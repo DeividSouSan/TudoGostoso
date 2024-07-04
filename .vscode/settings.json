@@ -1,0 +1,10 @@
+{
+    "conventionalCommits.scopes": [
+        "routes",
+        "dto",
+        "repository",
+        "use cases",
+        "models",
+        "dependencies"
+    ]
+}
