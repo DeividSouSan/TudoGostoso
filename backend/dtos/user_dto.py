@@ -3,7 +3,7 @@ from uuid import UUID
 from models.user import User
 
 
-class GetUserDTO(BaseModel):
+class UserDTO(BaseModel):
     id_user: UUID
     fullname: str
     username: str
