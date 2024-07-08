@@ -1,5 +1,5 @@
 
-from dtos.get_user_dto import GetUserDTO
+from backend.dtos.user_dto import GetUserDTO
 from repository.user_repository import UserRepository
 
 
