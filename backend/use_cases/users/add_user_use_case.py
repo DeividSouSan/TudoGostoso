@@ -1,8 +1,8 @@
 
 from uuid import UUID
-from backend.dtos.register_user_dto import RegisterUserDTO
-from backend.models.user import User
-from backend.dtos.user_dto import UserDTO
+from dtos.register_user_dto import RegisterUserDTO
+from models.user import User
+from dtos.user_dto import UserDTO
 from repository.user_repository import UserRepository
 
 
