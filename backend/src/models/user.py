@@ -12,3 +12,4 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100))
      
+    # ! Marcar nullable = false onde precisar (no caso tudo)
