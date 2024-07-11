@@ -1,14 +1,13 @@
 from uuid import UUID
 
 from fastapi import APIRouter
-
-from use_cases.users.add_user_use_case import AddUserUseCase
-from dtos.register_user_dto import RegisterUserDTO
-from dtos.user_dto import UserDTO
-from models.user import User
-from repository.user_repository import UserRepository
-from use_cases.users.get_user_use_case import GetUserUseCase
-from use_cases.users.get_users_use_case import GetUsersUseCase
+from src.dtos.register_user_dto import RegisterUserDTO
+from src.dtos.user_dto import UserDTO
+from src.models.user import User
+from src.repositories.user_repository import UserRepository
+from src.use_cases.users.add_user_use_case import AddUserUseCase
+from src.use_cases.users.get_user_use_case import GetUserUseCase
+from src.use_cases.users.get_users_use_case import GetUsersUseCase
 
 user_router = APIRouter(prefix="/users", tags=["user"])
 
@@ -39,8 +38,6 @@ async def add_user(user: RegisterUserDTO):
 
     use_case = AddUserUseCase(repository)
     use_case.execute(user)
-    
-
 
     return user
 

@@ -1,6 +1,7 @@
-from pydantic import BaseModel
 from uuid import UUID
-from models.user import User
+
+from pydantic import BaseModel
+from src.models.user import User
 
 
 class UserDTO(BaseModel):
@@ -14,5 +15,5 @@ class UserDTO(BaseModel):
             id_user=user.id_user,
             fullname=user.fullname,
             username=user.username,
-            email=user.email
+            email=user.email,
         )

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from dtos.recipes import Recipe
+from src.dtos.recipes import Recipe
 
 recipe_router = APIRouter(prefix="/recipes", tags=["recipes"])
 

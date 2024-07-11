@@ -1,7 +1,7 @@
-
 from uuid import UUID
-from dtos.user_dto import UserDTO
-from repository.user_repository import UserRepository
+
+from src.dtos.user_dto import UserDTO
+from src.repositories.user_repository import UserRepository
 
 
 class GetUserUseCase:

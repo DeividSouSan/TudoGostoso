@@ -1,6 +1,5 @@
-
-from dtos.user_dto import UserDTO
-from repository.user_repository import UserRepository
+from src.dtos.user_dto import UserDTO
+from src.repositories.user_repository import UserRepository
 
 
 class GetUsersUseCase:
@@ -9,7 +8,7 @@ class GetUsersUseCase:
 
     def execute(self) -> UserDTO:
         users = self._repository.get_users()
-        
+
         users_dto = map(UserDTO, users)
 
         return users_dto
