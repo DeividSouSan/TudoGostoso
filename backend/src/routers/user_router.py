@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter
-from backend.src.dtos.user_register_dto import RegisterUserDTO
+from backend.src.dtos.user_register_dto import UserRegisterDTO
 from src.dtos.user_dto import UserDTO
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
@@ -15,7 +15,7 @@ user_router = APIRouter(prefix="/users", tags=["user"])
 
 
 @user_router.get("")
-async def get_users() -> list[UserDTO]:
+async def get_all() -> list[UserDTO]:
     repository = UserRepository()
 
     use_case = GetUsersUseCase(repository)
@@ -25,7 +25,7 @@ async def get_users() -> list[UserDTO]:
 
 
 @user_router.get("/{id_user:uuid}")
-async def get_user(id_user: UUID) -> UserDTO:
+async def get(id_user: UUID) -> UserDTO:
     repository = UserRepository()
 
     use_case = GetUserUseCase(repository)
@@ -35,7 +35,7 @@ async def get_user(id_user: UUID) -> UserDTO:
 
 
 @user_router.post("")
-async def register_user(user: RegisterUserDTO):
+async def register(user: UserRegisterDTO):
     # O que geralmente eu retorno nessa rota?
     repository = UserRepository()
 
