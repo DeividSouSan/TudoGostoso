@@ -1,13 +1,15 @@
 from uuid import UUID
 
 from fastapi import APIRouter
-from src.dtos.register_user_dto import RegisterUserDTO
+from backend.src.dtos.user_register_dto import RegisterUserDTO
 from src.dtos.user_dto import UserDTO
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
-from src.use_cases.users.add_user_use_case import AddUserUseCase
+from src.use_cases.users.register_user_use_case import RegisterUserUseCase
 from src.use_cases.users.get_user_use_case import GetUserUseCase
 from src.use_cases.users.get_users_use_case import GetUsersUseCase
+
+from fastapi.responses import JSONResponse
 
 user_router = APIRouter(prefix="/users", tags=["user"])
 
@@ -29,24 +31,15 @@ async def get_user(id_user: UUID) -> UserDTO:
     use_case = GetUserUseCase(repository)
     user = use_case.execute(id_user)
 
-    return user
+    return {"user": user}
 
 
 @user_router.post("")
-async def add_user(user: RegisterUserDTO):
+async def register_user(user: RegisterUserDTO):
+    # O que geralmente eu retorno nessa rota?
     repository = UserRepository()
 
-    use_case = AddUserUseCase(repository)
+    use_case = RegisterUserUseCase(repository)
     use_case.execute(user)
 
-    return user
-
-
-@user_router.put("/{user_id}")
-async def update_recipe(user_id: int):
-    return {"response": f"updated recipe {user_id}"}
-
-
-@user_router.delete("/{user_id}")
-async def delete_recipe(user_id: int):
-    return {"response": f"deleted recipe {user_id}"}
+    return JSONResponse(status_code=200, content={"message": "user added to database"})
