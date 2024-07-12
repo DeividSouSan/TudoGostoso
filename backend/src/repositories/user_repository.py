@@ -10,7 +10,7 @@ class UserRepository:
 
         self.__engine = engine
 
-    def add_user(self, user: User):
+    def add_user(self, user: User) -> None:
         with Session(self.__engine) as session:
             session.add(user)
             session.commit()
