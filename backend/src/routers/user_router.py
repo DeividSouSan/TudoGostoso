@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter
-from backend.src.dtos.user_register_dto import UserRegisterDTO
+from src.dtos.user_register_dto import UserRegisterDTO
 from src.dtos.user_dto import UserDTO
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
