@@ -2,10 +2,13 @@ import bcrypt
 
 
 class PasswordHasher:
-    def hash(self, req_password: str) -> bytes:
-        return bcrypt.hashpw(req_password.encode("utf8", bcrypt.gensalt()))
+    @staticmethod
+    def hash(self, password_text: str) -> bytes:
+        return bcrypt.hashpw(password_text.encode("utf8", bcrypt.gensalt()))
 
-    def verify(self, db_pwd_hash, req_password) -> bool:
-        hashed = self.hash(req_password)
-
-        return db_pwd_hash == hashed
+    @staticmethod
+    def verify(self, password_text, password_hash) -> bool:
+        password_text = bytes(password_text)
+        password_hash = bytes(password_hash)
+        
+        return bcrypt.checkpw(password_text, password_hash)

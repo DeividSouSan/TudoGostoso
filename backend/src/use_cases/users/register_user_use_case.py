@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from backend.src.dtos.user_register_dto import UserRegisterDTO
+from src.dtos.user_register_dto import UserRegisterDTO
 from src.dtos.user_dto import UserDTO
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
+from src.utils.password_hasher import PasswordHasher
 
 
 class RegisterUserUseCase:
@@ -11,15 +12,13 @@ class RegisterUserUseCase:
         self._repository = repository
 
     def execute(self, user: UserRegisterDTO) -> None:
-
         new_user = self._generate_user(user)
-
         self._repository.add_user(new_user)
 
-    def _generate_user(self, user: User) -> User:
+    def _generate_user(self, user: UserRegisterDTO) -> User:
         return User(
             username=user.username,
             fullname=user.fullname,
-            password_hash=user.password, # ! Fazer o hash aqui
+            password_hash=PasswordHasher.hash(user.password),
             email=user.email
         )
