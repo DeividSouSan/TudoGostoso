@@ -26,3 +26,8 @@ class UserRepository:
             user = session.query(User).filter(User.id_user == id_user).first()
 
             return user
+
+    def get_by_email(self, user_email: str) -> User:
+        with Session(self.__engine) as session:
+            return session.query(User).filter(User.email == user_email).first()
+            

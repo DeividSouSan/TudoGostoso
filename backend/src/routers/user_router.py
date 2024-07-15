@@ -1,7 +1,9 @@
 from uuid import UUID
 
 from fastapi import APIRouter
+from src.use_cases.users.login_user_use_case import LoginUserUseCase
 from src.dtos.user_register_dto import UserRegisterDTO
+from src.dtos.user_login_dto import UserLoginDTO
 from src.dtos.user_dto import UserDTO
 from src.models.user import User
 from src.repositories.user_repository import UserRepository
@@ -43,3 +45,12 @@ async def register(user: UserRegisterDTO):
     use_case.execute(user)
 
     return JSONResponse(status_code=200, content={"message": "user added to database"})
+
+@user_router.post("/login")
+async def register(user: UserLoginDTO):
+    repository = UserRepository()
+
+    use_case = LoginUserUseCase(repository)
+    token = use_case.execute(user)
+
+    return JSONResponse(status_code=200, content={"token": token})
