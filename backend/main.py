@@ -1,15 +1,36 @@
 from fastapi import FastAPI, Request
-from src.routers.recipe_router import recipe_router
-from src.routers.user_router import user_router
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+from .src.routers.recipe_router import recipe_router
+from .src.routers.user_router import user_router
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 
+app.include_router(recipe_router)
+app.include_router(user_router)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder({"detail": exc.errors()})
+    )
+
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request: Request, exc: ValidationError):
+    return JSONResponse(
+        status_code=400,
+        content=jsonable_encoder({"detail": exc.errors()})
+    )
+
 
 def create_tables():
-    import src.db.base as base
-    from src.db.connection import engine
-    from src.models.recipe import Recipe
-    from src.models.user import User
+    import backend.src.db.base as base
+    from backend.src.db.connection import engine
+    from backend.src.models.recipe import Recipe
+    from backend.src.models.user import User
 
     base.Base.metadata.create_all(bind=engine)
 
@@ -17,5 +38,4 @@ def create_tables():
 create_tables()
 
 
-app.include_router(recipe_router)
-app.include_router(user_router)
+
