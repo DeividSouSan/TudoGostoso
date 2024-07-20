@@ -7,7 +7,7 @@ class GetUsersUseCase:
         self._repository = repository
 
     def execute(self) -> list[UserDTO]:
-        users = self._repository.get_users()
+        users = self._repository.all()
 
         users_dto = map(UserDTO, users)
 

@@ -11,7 +11,7 @@ class GetUserUseCase:
         self._repository = repository
 
     def execute(self, id_user: UUID) -> UserDTO:
-        user = self._repository.get_user(id_user)
+        user = self._repository.get_by_id(id_user)
         
         if user is None:
             raise Exception("oi")

@@ -15,7 +15,7 @@ class RegisterUserUseCase:
 
     def execute(self, user: UserRegisterDTO) -> None:
         new_user = self._generate_user(user)
-        self._repository.add_user(new_user)
+        self._repository.add(new_user)
 
     def _generate_user(self, user: UserRegisterDTO) -> User:
         return User(
