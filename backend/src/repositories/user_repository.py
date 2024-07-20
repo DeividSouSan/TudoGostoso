@@ -1,33 +1,29 @@
+from typing import Optional, TypeVar
 from uuid import UUID
 
 from sqlalchemy.orm import Session
-from src.models.user import User
+from ..models.user import User
 
 
 class UserRepository:
     def __init__(self):
-        from src.db.connection import engine
+        from ..db.connection import engine
 
         self.__engine = engine
 
-    def add_user(self, user: User) -> None:
+    def add(self, user: User) -> None:
         with Session(self.__engine) as session:
             session.add(user)
             session.commit()
 
-    def get_users(self) -> list[User]:
+    def all(self) -> list[User]:
         with Session(self.__engine) as session:
-            users = session.query(User).all()
+            return session.query(User).all()
 
-            return users
-
-    def get_user(self, id_user: UUID) -> User:
+    def get_by_id(self, id: UUID) -> User | None:
         with Session(self.__engine) as session:
-            user = session.query(User).filter(User.id_user == id_user).first()
+            return session.query(User).filter(User.id_user == id).first()
 
-            return user
-
-    def get_by_email(self, user_email: str) -> User:
+    def get_by_email(self, email: str) -> User | None:
         with Session(self.__engine) as session:
-            return session.query(User).filter(User.email == user_email).first()
-            
+            return session.query(User).filter(User.email == email).first()
