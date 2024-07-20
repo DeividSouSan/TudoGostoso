@@ -1,6 +1,5 @@
-from typing import Union
 from typing_extensions import Annotated
-from pydantic import BaseModel, field_validator, EmailStr, Field, validator
+from pydantic import BaseModel, field_validator, EmailStr, Field
 import re
 
 class UserRegisterDTO(BaseModel):
