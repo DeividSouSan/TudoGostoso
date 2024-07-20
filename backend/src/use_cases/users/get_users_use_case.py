@@ -1,12 +1,12 @@
-from src.dtos.user_dto import UserDTO
-from src.repositories.user_repository import UserRepository
-
+from ...dtos.user_dto import UserDTO
+from ...repositories.user_repository import UserRepository
+from fastapi import Depends
 
 class GetUsersUseCase:
-    def __init__(self, repository: UserRepository):
+    def __init__(self, repository: UserRepository = Depends(UserRepository)):
         self._repository = repository
 
-    def execute(self) -> UserDTO:
+    def execute(self) -> list[UserDTO]:
         users = self._repository.get_users()
 
         users_dto = map(UserDTO, users)
