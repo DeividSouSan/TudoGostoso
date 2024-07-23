@@ -10,10 +10,10 @@ class UserRegisterDTO(BaseModel):
 
     @field_validator('fullname', mode="before")
     @classmethod
-    def fullname_must_contain_space(cls, fullname: str) -> str:
-        if ' ' not in fullname:
+    def fullname_must_contain_space(cls, value: str) -> str:
+        if ' ' not in value:
             raise ValueError('Fullname must contain at least one (1) space.')
-        return fullname.title()
+        return value.title()
     
     @field_validator('password')
     @classmethod
