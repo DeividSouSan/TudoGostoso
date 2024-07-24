@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
-from backend.src.dtos.user_login_dto import UserLoginDTO
+from datetime import datetime, timedelta, UTC
+from ..dtos.user_login_dto import UserLoginDTO
 from jose import jwt
 import os
 
@@ -15,10 +15,15 @@ class TokenGenerator:
     def generate(self, data: dict[str, str]):
         claims = data.copy()
         
-        expire = datetime.now() + timedelta(minutes=self.__expires)
+        expire = datetime.now(UTC) + timedelta(minutes=self.__expires)
         claims.update({"exp": expire})
 
         encoded_jwt = jwt.encode(
             claims=claims, key=self.__secret_key, algorithm=self.__algorithm)
         
         return encoded_jwt
+
+    def verify(self, token: str) -> dict[str, str]:
+        decoded_jwt = jwt.decode(token=token, key=self.__secret_key, algorithms=[self.__algorithm])
+        return decoded_jwt
+        
