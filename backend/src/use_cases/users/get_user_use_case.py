@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
 from ...dtos.user_dto import UserDTO
 from ...repositories.user_repository import UserRepository
@@ -14,8 +14,9 @@ class GetUserUseCase:
         user = self._repository.get_by_id(id_user)
         
         if user is None:
-            raise Exception("oi")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User with id not found."
+            )
         
         return UserDTO(user)
-        
-        
