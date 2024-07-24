@@ -9,13 +9,13 @@ from ..use_cases.users.login_user_use_case import LoginUserUseCase
 from ..use_cases.users.register_user_use_case import RegisterUserUseCase
 from ..use_cases.users.get_user_use_case import GetUserUseCase
 from ..use_cases.users.get_users_use_case import GetUsersUseCase
-from ..models.user import User
+from ..models.users import User
 from fastapi.encoders import jsonable_encoder
 
-user_router = APIRouter(prefix="/users", tags=["user"])
+users = APIRouter(prefix="/users", tags=["user"])
 
 
-@user_router.get("")
+@users.get("")
 async def get_all(use_case: GetUsersUseCase = Depends(GetUsersUseCase)) -> JSONResponse:
     users = use_case.execute()
     
@@ -26,7 +26,7 @@ async def get_all(use_case: GetUsersUseCase = Depends(GetUsersUseCase)) -> JSONR
         content={"users": jsonable_encoder(users)}
     )
 
-@user_router.get("/{id_user:uuid}")
+@users.get("/{id_user:uuid}")
 async def get(id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase)) -> JSONResponse:
     try:
         
@@ -43,7 +43,7 @@ async def get(id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase))
         )
 
 
-@user_router.post("")
+@users.post("")
 async def register(user: UserRegisterDTO, use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)) -> JSONResponse:
     try:
         use_case.execute(user)
@@ -58,7 +58,7 @@ async def register(user: UserRegisterDTO, use_case: RegisterUserUseCase = Depend
             content={"message": str(e)}
         )
 
-@user_router.post("/login")
+@users.post("/login")
 async def login(user: UserLoginDTO, use_case: LoginUserUseCase = Depends(LoginUserUseCase)) -> JSONResponse:
     try:
         token = use_case.execute(user)

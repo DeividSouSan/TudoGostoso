@@ -2,14 +2,14 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-from .src.routers.recipe_router import recipe_router
-from .src.routers.user_router import user_router
+from .src.routers.recipes_router import recipes
+from .src.routers.users_router import users
 from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 
-app.include_router(recipe_router)
-app.include_router(user_router)
+app.include_router(users)
+app.include_router(recipes)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
