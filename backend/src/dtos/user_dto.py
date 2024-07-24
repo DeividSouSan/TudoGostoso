@@ -2,7 +2,7 @@ from typing_extensions import Annotated
 from uuid import UUID
 
 from pydantic import BaseModel, UUID4, EmailStr, Field, field_validator
-from ..models.user import User
+from ..models.users import User
 
 
 class UserDTO(BaseModel):

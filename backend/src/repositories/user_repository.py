@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from ..models.user import User
+from ..models.users import User
 from ..utils.deps import get_db
 from ..utils.exceptions import UserAlreadyExistsError
 
