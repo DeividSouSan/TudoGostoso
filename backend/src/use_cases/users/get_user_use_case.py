@@ -12,11 +12,10 @@ class GetUserUseCase:
 
     def execute(self, id_user: UUID) -> UserDTO:
         user = self._repository.get_by_id(id_user)
-        
+
         if user is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User with id not found."
+                status_code=status.HTTP_404_NOT_FOUND, detail="User with id not found."
             )
-        
+
         return UserDTO(user)

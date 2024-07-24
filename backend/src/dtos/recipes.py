@@ -1,7 +1,7 @@
+from datetime import date
 from typing import Union
 
 from pydantic import BaseModel
-from datetime import date
 
 
 class Recipe(BaseModel):
@@ -9,4 +9,3 @@ class Recipe(BaseModel):
     description: Union[str, None] = None
     creation_date: date
     creator_id: str
-    

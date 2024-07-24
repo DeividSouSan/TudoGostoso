@@ -1,20 +1,23 @@
+import enum
 from uuid import UUID, uuid4
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
+
 from ..db.base import Base
-import enum
 
 
 class UserRole(enum.Enum):
     ADMIN = "admin"
     USER = "user"
 
-    
+
 class User(Base):
     __tablename__ = "users"
 
-    id_user: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4, nullable=False)
+    id_user: Mapped[UUID] = mapped_column(
+        primary_key=True, default=uuid4, nullable=False
+    )
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     fullname: Mapped[str] = mapped_column(String(100), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(100), nullable=False)

@@ -1,8 +1,10 @@
 from typing import Generator
-from fastapi import Depends, HTTPException, Header, status
-from ..db.connection import engine
-from sqlalchemy.orm import Session
+
+from fastapi import Depends, Header, HTTPException, status
 from jose import jwt
+from sqlalchemy.orm import Session
+
+from ..db.connection import engine
 from ..utils.token_generator import TokenGenerator
 
 
@@ -11,14 +13,12 @@ def get_db() -> Generator[Session, None, None]:
         yield session
 
 
-def get_authorization_token(token: str = Header(...),
-                            token_generator: TokenGenerator = Depends(
-                                TokenGenerator)
-                            ) -> dict[str, str]:
+def get_authorization_token(
+    token: str = Header(...), token_generator: TokenGenerator = Depends(TokenGenerator)
+) -> dict[str, str]:
     if not token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is required."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is required."
         )
 
     try:
@@ -27,8 +27,9 @@ def get_authorization_token(token: str = Header(...),
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token signature has expired.")
+            detail="Token signature has expired.",
+        )
     except jwt.JWTError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is invalid")
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is invalid"
+        )
