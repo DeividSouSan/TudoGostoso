@@ -28,12 +28,12 @@ async def validation_error_handler(request: Request, exc: ValidationError):
 
 
 def create_tables():
-    import backend.src.db.base as base
-    from backend.src.db.connection import engine
-    from backend.src.models.recipe import Recipe
-    from backend.src.models.user import User
+    from .src.db.base import Base
+    from .src.db.connection import engine
+    from .src.models.recipes import Recipe
+    from .src.models.users import User
 
-    base.Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
 
 create_tables()
