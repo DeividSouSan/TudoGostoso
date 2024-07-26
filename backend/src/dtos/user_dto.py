@@ -4,6 +4,7 @@ from pydantic import UUID4, BaseModel, EmailStr, Field, field_validator
 from typing_extensions import Annotated
 
 from ..models.users import User
+from ..models.recipes import Recipe
 
 
 class UserDTO(BaseModel):
@@ -11,6 +12,8 @@ class UserDTO(BaseModel):
     fullname: Annotated[str, Field(min_length=3, max_length=50)]
     username: Annotated[str, Field(max_length=32)]
     email: Annotated[EmailStr, Field(max_length=64)]
+    role: str
+    recipes: list
 
     @field_validator("fullname", mode="before")
     @classmethod
@@ -25,4 +28,6 @@ class UserDTO(BaseModel):
             fullname=user.fullname,
             username=user.username,
             email=user.email,
+            role=user.role,
+            recipes=user.recipes
         )
