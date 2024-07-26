@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from ..dtos.recipe_dto import RecipeDTO
 from ..dtos.recipe_create_dto import RecipeCreateDTO
 from ..utils.deps import get_authorization_token
 from ..use_cases.recipes.create_recipe_use_case import CreateRecipeUseCase
+from uuid import UUID
 
 recipes = APIRouter(prefix="/recipes", tags=["recipes"])
 
