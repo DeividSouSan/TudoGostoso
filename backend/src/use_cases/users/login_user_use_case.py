@@ -35,7 +35,7 @@ class LoginUserUseCase:
             )
 
         token = self._token_handler.generate(
-            {"email": user_db.email, "role": jsonable_encoder(user_db.role)}
+            {"id_user": jsonable_encoder(user_db.id_user), "role": jsonable_encoder(user_db.role)}
         )
 
         return token

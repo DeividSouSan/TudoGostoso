@@ -12,3 +12,7 @@ from ..utils.exceptions import UserAlreadyExistsError
 class RecipeRepository:
     def __init__(self, session: Annotated[Session, Depends(get_db)]) -> None:
         self.__session = session
+
+    def add(self, recipe: Recipe) -> None:
+        self.__session.add(recipe)
+        self.__session.commit()
