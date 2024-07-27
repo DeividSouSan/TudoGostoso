@@ -3,8 +3,6 @@ from uuid import UUID
 from fastapi import Depends, HTTPException, status
 
 from ...models.users import User
-
-from ...dtos.user.user_dto import UserDTO
 from ...repositories.user_repository import UserRepository
 
 

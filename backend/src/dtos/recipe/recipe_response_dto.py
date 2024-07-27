@@ -1,5 +1,5 @@
 from datetime import date
-from typing import NewType, Union
+from typing import Union
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ from pydantic import BaseModel
 type Date = date
 
 
-class RecipeDTO(BaseModel):
+class RecipeResponseDTO(BaseModel):
     id_recipe: UUID
     title: str
     description: Union[str, None] = None

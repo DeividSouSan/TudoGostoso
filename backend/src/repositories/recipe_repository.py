@@ -1,10 +1,11 @@
-from typing import Annotated, List, Type
+from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from ..models.recipes import Recipe
 from ..utils.deps import get_db
+
 
 class RecipeRepository:
     def __init__(self, session: Annotated[Session, Depends(get_db)]) -> None:
