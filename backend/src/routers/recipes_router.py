@@ -4,10 +4,10 @@ from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..use_cases.recipes.create_recipe_use_case import CreateRecipeUseCase
 from ..utils.deps import get_authorization_token
 
-recipes = APIRouter(prefix="/recipes", tags=["recipes"])
+recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
-@recipes.get("")
+@recipes_router.get("")
 async def get_all(token: dict[str, str] = Depends(get_authorization_token)):
     if token["role"] != "user":
         return {"message": "You are not authorized to access this resource."}
@@ -15,7 +15,7 @@ async def get_all(token: dict[str, str] = Depends(get_authorization_token)):
     return {"message": "Here are all the recipes"}
 
 
-@recipes.post("")
+@recipes_router.post("")
 async def create_recipe(
         recipe: RecipeCreateRequestDTO,
         token: dict[str, str] = Depends(get_authorization_token),
