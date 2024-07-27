@@ -4,49 +4,45 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from ..dtos.user_dto import UserDTO
-from ..dtos.user_login_dto import UserLoginDTO
-from ..dtos.user_register_dto import UserRegisterDTO
-from ..models.users import User
+from ..dtos.user.user_dto import UserDTO
+from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
+from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ..use_cases.users.get_user_use_case import GetUserUseCase
 from ..use_cases.users.get_users_use_case import GetUsersUseCase
 from ..use_cases.users.login_user_use_case import LoginUserUseCase
 from ..use_cases.users.register_user_use_case import RegisterUserUseCase
 
-users = APIRouter(prefix="/users", tags=["user"])
+users_router = APIRouter(prefix="/users", tags=["user"])
 
 
-@users.get("")
+@users_router.get("")
 async def get_all(use_case: GetUsersUseCase = Depends(GetUsersUseCase)) -> JSONResponse:
     users = use_case.execute()
 
-    users = list(map(UserDTO, users))
+    users = jsonable_encoder([UserDTO(user) for user in users])
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"users": jsonable_encoder(users)}
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"users": users})
 
 
-@users.get("/{id_user:uuid}")
-async def get(
-    id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase)
-) -> JSONResponse:
+@users_router.get("/{id_user:uuid}")
+async def get(id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase)) -> JSONResponse:
     try:
-
         user = use_case.execute(id_user)
 
         return JSONResponse(
-            status_code=status.HTTP_200_OK, content={"users": jsonable_encoder(user)}
+            status_code=status.HTTP_200_OK,
+            content={"users": jsonable_encoder(user)}
         )
     except Exception as e:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": str(e)}
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": str(e)}
         )
 
 
-@users.post("")
+@users_router.post("")
 async def register(
-    user: UserRegisterDTO, use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)
+        user: UserRegisterRequestDTO, use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)
 ) -> JSONResponse:
     try:
         use_case.execute(user)
@@ -60,9 +56,9 @@ async def register(
         )
 
 
-@users.post("/login")
+@users_router.post("/login")
 async def login(
-    user: UserLoginDTO, use_case: LoginUserUseCase = Depends(LoginUserUseCase)
+        user: UserLoginRequestDTO, use_case: LoginUserUseCase = Depends(LoginUserUseCase)
 ) -> JSONResponse:
     try:
         token = use_case.execute(user)
