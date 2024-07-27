@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing_extensions import Annotated
 
 
-class UserRegisterDTO(BaseModel):
+class UserRegisterRequestDTO(BaseModel):
     fullname: Annotated[str, Field(min_length=3, max_length=50)]
     email: Annotated[EmailStr, Field(max_length=64)]
     username: Annotated[str, Field(max_length=32)]

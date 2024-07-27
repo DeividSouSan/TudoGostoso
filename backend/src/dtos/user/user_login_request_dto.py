@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing_extensions import Annotated
 
 
-class UserLoginDTO(BaseModel):
+class UserLoginRequestDTO(BaseModel):
     email: Annotated[EmailStr, Field(max_length=64)]
     password: Annotated[str, Field(min_length=8, max_length=64)]
 

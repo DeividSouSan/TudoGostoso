@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 type Date = date
 
-class RecipeCreateDTO(BaseModel):
+
+class RecipeRequestDTO(BaseModel):
     title: str
     description: Union[str, None] = None
