@@ -11,15 +11,15 @@ class CreateRecipeUseCase:
     def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)):
         self._repository = repository
 
-    def execute(self, recipe: RecipeCreateDTO, user_id: str):
-        
+    def execute(self, recipe: RecipeRequestDTO, user_id: str):
+
         new_recipe = Recipe(
             title=recipe.title,
             description=recipe.description,
             creation_date=datetime.now(),
-            user_id=UUID(user_id)
+            user_id=UUID(user_id),
         )
-        
+
         print(new_recipe)
         self._repository.add(new_recipe)
 
