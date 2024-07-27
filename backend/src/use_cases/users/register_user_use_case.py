@@ -1,9 +1,6 @@
-from uuid import UUID
-
 from fastapi import Depends, HTTPException, status
 
-from ...dtos.user_dto import UserDTO
-from ...dtos.user_register_dto import UserRegisterDTO
+from ...dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ...models.users import User
 from ...repositories.user_repository import UserRepository
 from ...utils.exceptions import UserAlreadyExistsError
@@ -14,7 +11,7 @@ class RegisterUserUseCase:
     def __init__(self, repository: UserRepository = Depends(UserRepository)):
         self._repository = repository
 
-    def execute(self, user: UserRegisterDTO) -> None:
+    def execute(self, user: UserRegisterRequestDTO) -> None:
         try:
             new_user = User(
                 username=user.username,

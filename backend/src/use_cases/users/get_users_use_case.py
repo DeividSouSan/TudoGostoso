@@ -1,8 +1,5 @@
-from fastapi import Depends, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import Depends
 
-from ...dtos.user_dto import UserDTO
 from ...models.users import User
 from ...repositories.user_repository import UserRepository
 

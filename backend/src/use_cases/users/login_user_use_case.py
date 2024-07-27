@@ -1,11 +1,7 @@
-from uuid import UUID
-
 from fastapi import Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
-from ...dtos.user_login_dto import UserLoginDTO
-from ...models.users import User
+from ...dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ...repositories.user_repository import UserRepository
 from ...utils.password_hasher import PasswordHasher
 from ...utils.token_generator import TokenGenerator
@@ -20,7 +16,7 @@ class LoginUserUseCase:
         self._repository = repository
         self._token_handler = token_handler
 
-    def execute(self, user: UserLoginDTO) -> str:
+    def execute(self, user: UserLoginRequestDTO) -> str:
         user_db = self._repository.get_by_email(user.email)
 
         if user_db is None:
@@ -35,7 +31,10 @@ class LoginUserUseCase:
             )
 
         token = self._token_handler.generate(
-            {"id_user": jsonable_encoder(user_db.id_user), "role": jsonable_encoder(user_db.role)}
+            {
+                "id_user": jsonable_encoder(user_db.id_user),
+                "role": jsonable_encoder(user_db.role),
+            }
         )
 
         return token

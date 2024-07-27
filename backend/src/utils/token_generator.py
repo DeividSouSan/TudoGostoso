@@ -3,8 +3,6 @@ from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 
-from ..dtos.user_login_dto import UserLoginDTO
-
 
 class TokenGenerator:
     def __init__(self, expiration_minutes: int = 30):
