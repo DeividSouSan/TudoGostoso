@@ -31,3 +31,9 @@ class UserRepository:
 
     def get_by_username(self, username: str) -> User | None:
         return self.__session.query(User).filter(User.email == username).first()
+
+    def get_by_activation_code(self, token: str) -> User | None:
+        return self.__session.query(User).where(User.activation_code == token).first()
+
+    def commit(self):
+        self.__session.commit()
