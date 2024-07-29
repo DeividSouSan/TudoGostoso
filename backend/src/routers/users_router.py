@@ -26,31 +26,32 @@ async def get_all(use_case: GetUsersUseCase = Depends(GetUsersUseCase)) -> JSONR
 
 
 @users_router.get("/{id_user:uuid}")
-async def get(id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase)) -> JSONResponse:
+async def get(
+        id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase)
+) -> JSONResponse:
     try:
         user = use_case.execute(id_user)
 
         return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"users": jsonable_encoder(user)}
+            status_code=status.HTTP_200_OK, content={"users": jsonable_encoder(user)}
         )
     except Exception as e:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": str(e)}
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": str(e)}
         )
 
 
 @users_router.post("")
 async def register(
         user: UserRegisterRequestDTO,
-        use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)
+        use_case: RegisterUserUseCase = Depends(RegisterUserUseCase),
 ) -> JSONResponse:
     try:
         use_case.execute(user)
 
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED, content={"message": "User account created. Access email to activate."}
+            status_code=status.HTTP_201_CREATED,
+            content={"message": "User account created. Access email to activate."},
         )
     except Exception as e:
         return JSONResponse(
@@ -61,14 +62,14 @@ async def register(
 @users_router.post("/verify/{activation_code:str}")
 async def activate_account(
         activation_code: str,
-        use_case: ActivateAccountUseCase = Depends(ActivateAccountUseCase)
+        use_case: ActivateAccountUseCase = Depends(ActivateAccountUseCase),
 ) -> JSONResponse:
     use_case.execute(activation_code)
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "User account activated."}
+        status_code=status.HTTP_200_OK, content={"message": "User account activated."}
     )
+
 
 @users_router.post("/login")
 async def login(

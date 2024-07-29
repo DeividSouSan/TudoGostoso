@@ -23,7 +23,7 @@ class RegisterUserUseCase:
             fullname=user.fullname,
             password_hash=PasswordHasher.hash(user.password),
             email=user.email,
-            activation_code=account_activation_code
+            activation_code=account_activation_code,
         )
 
         try:

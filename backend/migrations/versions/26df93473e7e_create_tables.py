@@ -1,14 +1,15 @@
 """create tables
 
 Revision ID: 26df93473e7e
-Revises: 
+Revises:
 Create Date: 2024-07-29 14:12:11.660491
 
 """
+
 from typing import Sequence, Union
 
 # revision identifiers, used by Alembic.
-revision: str = '26df93473e7e'
+revision: str = "26df93473e7e"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

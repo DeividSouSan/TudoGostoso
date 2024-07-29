@@ -4,14 +4,12 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-type Date = date
-
 
 class RecipeResponseDTO(BaseModel):
     id_recipe: UUID
     title: str
     description: Union[str, None] = None
-    creation_date: Date
+    creation_date: date
     creator_id: UUID
 
     def __init__(self, recipe):
@@ -20,5 +18,5 @@ class RecipeResponseDTO(BaseModel):
             title=recipe.title,
             description=recipe.description,
             creation_date=recipe.creation_date,
-            creator_id=recipe.user_id
+            creator_id=recipe.user_id,
         )
