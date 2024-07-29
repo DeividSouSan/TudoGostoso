@@ -42,18 +42,25 @@ async def get(id_user: UUID, use_case: GetUserUseCase = Depends(GetUserUseCase))
 
 @users_router.post("")
 async def register(
-        user: UserRegisterRequestDTO, use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)
+        user: UserRegisterRequestDTO,
+        use_case: RegisterUserUseCase = Depends(RegisterUserUseCase)
 ) -> JSONResponse:
     try:
         use_case.execute(user)
 
         return JSONResponse(
-            status_code=status.HTTP_201_CREATED, content={"message": "User created"}
+            status_code=status.HTTP_201_CREATED, content={"message": "User account created. Access email to activate."}
         )
     except Exception as e:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(e)}
         )
+
+
+@users_router.post("register/verify/{activatin_token}")
+async def activate_account(
+        activation_token: str):
+    pass
 
 
 @users_router.post("/login")
