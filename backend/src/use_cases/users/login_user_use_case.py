@@ -30,11 +30,9 @@ class LoginUserUseCase:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong password."
             )
 
-        token = self._token_handler.generate(
+        return self._token_handler.generate(
             {
                 "id_user": jsonable_encoder(user_db.id_user),
                 "role": jsonable_encoder(user_db.role),
             }
         )
-
-        return token

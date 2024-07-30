@@ -8,5 +8,5 @@ class GetUsersUseCase:
     def __init__(self, repository: UserRepository = Depends(UserRepository)):
         self._repository = repository
 
-    def execute(self) -> list[User]:
+    def execute(self) -> list[User | None]:
         return self._repository.all()

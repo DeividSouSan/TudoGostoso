@@ -14,7 +14,10 @@ class RegisterUserUseCase:
         self._repository = repository
 
     def execute(self, user: UserRegisterRequestDTO) -> None:
-        if self._repository.get_by_email(user.email) or self._repository.get_by_username(user.username):
+        EMAIL_ALREADY_EXISTS = bool(self._repository.get_by_email(user.email))
+        USERNAME_ALREADY_EXISTS = bool(self._repository.get_by_username(user.username))
+
+        if EMAIL_ALREADY_EXISTS or USERNAME_ALREADY_EXISTS:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with given email or username already exists.",
@@ -31,5 +34,5 @@ class RegisterUserUseCase:
         self._repository.add(new_user)
 
         ActivationCodeEmailSender.send_activation_code(
-            email_address=new_user.email,
-            activation_code=new_user.activation_code)
+            email_address=new_user.email, activation_code=new_user.activation_code
+        )

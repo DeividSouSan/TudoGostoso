@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
@@ -44,15 +44,13 @@ async def activate_account(
     use_case.execute(activation_code)
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "User account activated."}
+        status_code=status.HTTP_200_OK, content={"message": "User account activated."}
     )
 
 
 @auth_router.post("/login")
 async def login(
-        user: UserLoginRequestDTO,
-        use_case: LoginUserUseCase = Depends(LoginUserUseCase)
+        user: UserLoginRequestDTO, use_case: LoginUserUseCase = Depends(LoginUserUseCase)
 ) -> JSONResponse:
     """
     Logs in a user and returns an authorization token.
@@ -64,8 +62,9 @@ async def login(
             status_code=status.HTTP_200_OK,
             content={"message": "User authorized.", "token": token},
         )
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
     except Exception as e:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"message": str(e)}
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(e)}
         )

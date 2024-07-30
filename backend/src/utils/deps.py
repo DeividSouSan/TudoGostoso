@@ -33,3 +33,5 @@ def get_authorization_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is invalid"
         )
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))

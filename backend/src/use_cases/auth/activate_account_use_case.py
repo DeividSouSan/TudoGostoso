@@ -8,6 +8,7 @@ class ActivateAccountUseCase:
         self.__repository = respository
 
     def execute(self, code: str):
+        # Deveria dar get pelo email pois se o usuáiro já estivera ativado, o código não existiria
         user = self.__repository.get_by_activation_code(code)
 
         if user is None:

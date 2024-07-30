@@ -8,5 +8,5 @@ class GetAllRecipesUseCase:
     def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)):
         self._repository = repository
 
-    def execute(self) -> list[Recipe]:
+    def execute(self) -> list[Recipe | None]:
         return self._repository.get_all()

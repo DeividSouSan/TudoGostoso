@@ -1,18 +1,43 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
+from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
 from ..use_cases.recipes.create_recipe_use_case import CreateRecipeUseCase
+from ..use_cases.recipes.get_all_recipes_use_case import GetAllRecipesUseCase
 from ..utils.deps import get_authorization_token
 
 recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
 @recipes_router.get("")
-async def get_all(token: dict[str, str] = Depends(get_authorization_token)):
+async def get_all(
+        token: dict[str, str] = Depends(get_authorization_token),
+        use_case: GetAllRecipesUseCase = Depends(GetAllRecipesUseCase),
+) -> JSONResponse:
     if token["role"] != "user":
-        return {"message": "You are not authorized to access this resource."}
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You are not authorized to view recipes."},
+        )
 
-    return {"message": "Here are all the recipes"}
+    try:
+        recipes = use_case.execute()
+
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "recipes": jsonable_encoder(
+                    [RecipeResponseDTO(recipe) for recipe in recipes]
+                )
+            },
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": str(e)},
+        )
 
 
 @recipes_router.post("")
@@ -20,10 +45,21 @@ async def create_recipe(
         recipe: RecipeCreateRequestDTO,
         token: dict[str, str] = Depends(get_authorization_token),
         use_case: CreateRecipeUseCase = Depends(CreateRecipeUseCase),
-):
+) -> JSONResponse:
     if token["role"] not in ["user", "admin"]:
-        return {"message": "You are not authorized to access this resource."}
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"message": "You are not authorized to create a recipe."},
+        )
 
-    use_case.execute(recipe, token["id_user"])
+    try:
+        use_case.execute(recipe, token["id_user"])
 
-    return {"message": "Recipe created successfully"}
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED,
+            content={"message": "Recipe created successfully"},
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(e)}
+        )
