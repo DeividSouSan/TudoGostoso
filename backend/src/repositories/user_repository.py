@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from ..models.users import User
 from ..utils.deps import get_db
-from ..utils.exceptions import UserAlreadyExistsError
 
 
 class UserRepository:
@@ -14,9 +13,6 @@ class UserRepository:
         self.__session = session
 
     def add(self, user: User) -> None:
-        if self.get_by_email(user.email) or self.get_by_username(user.username):
-            raise UserAlreadyExistsError()
-
         self.__session.add(user)
         self.__session.commit()
 
