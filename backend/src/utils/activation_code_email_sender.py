@@ -10,7 +10,7 @@ load_dotenv()
 class ActivationCodeEmailSender:
     @staticmethod
     def send_activation_code(email_address: str, activation_code: int):
-        body = f"Click the link to activate your account: http://localhost:8000/register/verify/{activation_code}"
+        body = f"Click the link to activate your account: http://localhost:8000/auth/register/{activation_code}"
 
         msg = email.message.Message()
         msg.add_header("Content-Type", "text/html")

@@ -33,20 +33,31 @@ async def register(
         )
 
 
-@auth_router.post("/register/verify/{activation_code:str}")
+@auth_router.post("/register/{activation_code:str}")
 async def activate_account(
-        activation_code: str,
+        activation_code: str,  # Pydantic poderia validar esse parâmetro
         use_case: ActivateAccountUseCase = Depends(ActivateAccountUseCase),
 ) -> JSONResponse:
     """
     Activates a user account by verifying the activation code sent to the user's email.
     """
-    use_case.execute(activation_code)
+    try:
+        use_case.execute(activation_code)
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"message": "User account activated."}
-    )
-
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "User account activated."}
+        )
+    except HTTPException as e:
+        return JSONResponse(
+            status_code=e.status_code,
+            content={"message": e.detail}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": str(e)}
+        )
 
 @auth_router.post("/login")
 async def login(
