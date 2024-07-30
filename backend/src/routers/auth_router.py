@@ -16,13 +16,9 @@ async def register(
         use_case: RegisterUserUseCase = Depends(RegisterUserUseCase),
 ) -> JSONResponse:
     """
-    Register a new user
+    Registers a new user account into the database.
 
-    :param user: a UserRegisterRequestDTO object
-
-    :param use_case: a RegisterUserUseCase object
-
-    :return: a JSONResponse object
+    Note: the account is not activated until the user verifies the activation code sent to their email.
     """
     try:
         use_case.execute(user)
@@ -42,17 +38,25 @@ async def activate_account(
         activation_code: str,
         use_case: ActivateAccountUseCase = Depends(ActivateAccountUseCase),
 ) -> JSONResponse:
+    """
+    Activates a user account by verifying the activation code sent to the user's email.
+    """
     use_case.execute(activation_code)
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK, content={"message": "User account activated."}
+        status_code=status.HTTP_200_OK,
+        content={"message": "User account activated."}
     )
 
 
 @auth_router.post("/login")
 async def login(
-        user: UserLoginRequestDTO, use_case: LoginUserUseCase = Depends(LoginUserUseCase)
+        user: UserLoginRequestDTO,
+        use_case: LoginUserUseCase = Depends(LoginUserUseCase)
 ) -> JSONResponse:
+    """
+    Logs in a user and returns an authorization token.
+    """
     try:
         token = use_case.execute(user)
 
@@ -60,8 +64,8 @@ async def login(
             status_code=status.HTTP_200_OK,
             content={"message": "User authorized.", "token": token},
         )
-
     except Exception as e:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(e)}
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": str(e)}
         )
