@@ -8,7 +8,7 @@ from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
 from ..use_cases.recipes.create_recipe_use_case import CreateRecipeUseCase
 from ..use_cases.recipes.delete_recipe_use_case import DeleteRecipeUseCase
-from ..use_cases.recipes.get_all_recipes_use_case import GetAllRecipesUseCase
+from ..use_cases.recipes.get_recipes_use_case import GetRecipesUseCase
 from ..utils.deps import get_authorization_token
 
 recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
@@ -16,17 +16,29 @@ recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 @recipes_router.get("")
 async def get_all(
+        recipe_id: UUID = None,
+        recipe_title: str = None,
+        username: str = None,
+        user_id: UUID = None,
         token: dict[str, str] = Depends(get_authorization_token),
-        use_case: GetAllRecipesUseCase = Depends(GetAllRecipesUseCase),
+        use_case: GetRecipesUseCase = Depends(GetRecipesUseCase),
 ) -> JSONResponse:
-    if token["role"] != "user":
+    if not token:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"message": "You are not authorized to view recipes."},
         )
 
     try:
-        recipes = use_case.execute()
+
+        filters = {
+            "id": recipe_id,
+            "title": recipe_title,
+            "username": username,
+            "user_id": user_id,
+        }
+
+        recipes = use_case.execute(filters)
 
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -72,8 +84,8 @@ async def create(
 async def delete(
         recipe_id: UUID = None,
         recipe_title: str = None,
-        use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase),
-        token: dict[str, str] = Depends(get_authorization_token)
+        token: dict[str, str] = Depends(get_authorization_token),
+        use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase)
 ) -> JSONResponse:
     try:
         use_case.execute(token, recipe_id, recipe_title)
