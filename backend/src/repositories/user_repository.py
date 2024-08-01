@@ -16,7 +16,7 @@ class UserRepository:
         self.__session.add(user)
         self.__session.commit()
 
-    def all(self) -> list[User]:
+    def all(self) -> list[User | None]:
         return self.__session.query(User).all()
 
     def get_by_id(self, id: UUID) -> User | None:

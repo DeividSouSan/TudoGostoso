@@ -23,6 +23,7 @@ def get_authorization_token(
 
     try:
         token_data = token_generator.verify(token)
+
         return token_data
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -31,7 +32,10 @@ def get_authorization_token(
         )
     except jwt.JWTError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is invalid"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is invalid"
         )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e))
