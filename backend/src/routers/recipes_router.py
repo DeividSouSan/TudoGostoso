@@ -72,10 +72,11 @@ async def create(
 async def delete(
         recipe_id: UUID = None,
         recipe_title: str = None,
-        use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase)
+        use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase),
+        token: dict[str, str] = Depends(get_authorization_token)
 ) -> JSONResponse:
     try:
-        use_case.execute(recipe_id, recipe_title)
+        use_case.execute(token, recipe_id, recipe_title)
 
         return JSONResponse(
             status_code=status.HTTP_204_NO_CONTENT,
