@@ -24,8 +24,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 from src.db.base import Base
-from src.models.recipes import Recipe
-from src.models.users import Users
+
 target_metadata = Base.metadata
 
 
