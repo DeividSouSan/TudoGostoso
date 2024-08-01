@@ -16,14 +16,21 @@ class RecipeRepository:
         self.__session.add(recipe)
         self.__session.commit()
 
-    def get_all(self) -> list[Recipe]:
-        return self.__session.query(Recipe).all()
+    def get_all(self) -> any:
+        query = self.__session.query(Recipe)
+        return query.all()
 
-    def get_by_id(self, id: UUID) -> Recipe:
-        return self.__session.query(Recipe).filter(Recipe.id == id).first()
+    def get_by_id(self, recipe_id: UUID) -> any:
+        query = self.__session.query(Recipe).filter(Recipe.id_recipe == recipe_id)
+        return query.first()
 
-    def get_by_title(self, title: str) -> Recipe:
-        return self.__session.query(Recipe).filter(Recipe.title == title).first()
+    def get_by_title(self, title: str) -> any:
+        query = self.__session.query(Recipe).filter(Recipe.title.like(f"%{title}%"))
+        return query.all()
+
+    def get_by_user_id(self, user_id: UUID) -> any:
+        query = self.__session.query(Recipe).filter(Recipe.user_id == user_id)
+        return query.all()
 
     def delete(self, recipe: Recipe) -> None:
         self.__session.delete(recipe)

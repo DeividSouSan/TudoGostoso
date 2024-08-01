@@ -14,7 +14,8 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def get_authorization_token(
-    token: str = Header(...), token_generator: TokenGenerator = Depends(TokenGenerator)
+        token: str = Header(...),
+        token_generator: TokenGenerator = Depends(TokenGenerator)
 ) -> dict[str, str]:
     if not token:
         raise HTTPException(
