@@ -15,44 +15,26 @@ recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 
 @recipes_router.get("")
-async def get_all(
-        recipe_id: UUID = None,
-        recipe_title: str = None,
-        username: str = None,
-        user_id: UUID = None,
+async def get(
+        title: str | None = None,
         token: dict[str, str] = Depends(get_authorization_token),
         use_case: GetRecipesUseCase = Depends(GetRecipesUseCase),
 ) -> JSONResponse:
     if not token:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "You are not authorized to view recipes."},
+            detail={"message": "You are not authorized to view recipes."},
         )
 
-    try:
+    recipes = use_case.execute(title)
 
-        filters = {
-            "id": recipe_id,
-            "title": recipe_title,
-            "username": username,
-            "user_id": user_id,
-        }
+    if recipes:
+        recipes = [RecipeResponseDTO(user) for user in recipes]
 
-        recipes = use_case.execute(filters)
-
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "recipes": jsonable_encoder(
-                    [RecipeResponseDTO(recipe) for recipe in recipes]
-                )
-            },
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": str(e)},
-        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"recipes": jsonable_encoder(recipes)}
+    )
 
 
 @recipes_router.post("")
@@ -61,46 +43,35 @@ async def create(
         token: dict[str, str] = Depends(get_authorization_token),
         use_case: CreateRecipeUseCase = Depends(CreateRecipeUseCase),
 ) -> JSONResponse:
-    if token["role"] not in ["user", "admin"]:
-        return JSONResponse(
+    if token["role"] not in ["user"]:
+        raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            content={"message": "You are not authorized to create a recipe."},
+            detail={"message": "You are not authorized to create a recipe."},
         )
 
-    try:
-        use_case.execute(recipe, token["id_user"])
+    use_case.execute(recipe, token["id_user"])
 
-        return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
-            content={"message": "Recipe created successfully"},
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST, content={"message": str(e)}
-        )
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "Recipe created successfully"},
+    )
 
 
 @recipes_router.delete("")
 async def delete(
-        recipe_id: UUID = None,
-        recipe_title: str = None,
+        recipe_id: UUID | None = None,
         token: dict[str, str] = Depends(get_authorization_token),
         use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase)
 ) -> JSONResponse:
-    try:
-        use_case.execute(token, recipe_id, recipe_title)
+    if token["role"] not in ["user", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"message": "You are not authorized to create a recipe."},
+        )
 
-        return JSONResponse(
-            status_code=status.HTTP_204_NO_CONTENT,
-            content={"message": "Recipe deleted successfully."}
-        )
-    except HTTPException as e:
-        return JSONResponse(
-            status_code=e.status_code,
-            content={"message": e.detail}
-        )
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": str(e)}
-        )
+    use_case.execute(token, recipe_id)  # talvez passar só o role já fosse suficiente
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Recipe deleted successfully."}
+    )

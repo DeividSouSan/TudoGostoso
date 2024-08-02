@@ -4,8 +4,8 @@ from fastapi.responses import JSONResponse
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ..use_cases.auth.activate_account_use_case import ActivateAccountUseCase
-from ..use_cases.users.login_user_use_case import LoginUserUseCase
-from ..use_cases.users.register_user_use_case import RegisterUserUseCase
+from ..use_cases.auth.login_user_use_case import LoginUserUseCase
+from ..use_cases.auth.register_user_use_case import RegisterUserUseCase
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 

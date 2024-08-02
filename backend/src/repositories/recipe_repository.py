@@ -16,19 +16,19 @@ class RecipeRepository:
         self.__session.add(recipe)
         self.__session.commit()
 
-    def get_all(self) -> any:
+    def get(self) -> list[Recipe]:
         query = self.__session.query(Recipe)
         return query.all()
 
-    def get_by_id(self, recipe_id: UUID) -> any:
+    def get_by_id(self, recipe_id: UUID) -> Recipe | None:
         query = self.__session.query(Recipe).filter(Recipe.id_recipe == recipe_id)
         return query.first()
 
-    def get_by_title(self, title: str) -> any:
+    def get_by_title(self, title: str) -> list[Recipe]:
         query = self.__session.query(Recipe).filter(Recipe.title.like(f"%{title}%"))
         return query.all()
 
-    def get_by_user_id(self, user_id: UUID) -> any:
+    def get_by_user_id(self, user_id: UUID) -> list[Recipe]:
         query = self.__session.query(Recipe).filter(Recipe.user_id == user_id)
         return query.all()
 

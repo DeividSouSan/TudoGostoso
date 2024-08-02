@@ -12,7 +12,7 @@ class CreateRecipeUseCase:
     def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)):
         self._repository = repository
 
-    def execute(self, recipe: RecipeCreateRequestDTO, user_id: str) -> Recipe:
+    def execute(self, recipe: RecipeCreateRequestDTO, user_id: str) -> None:
 
         new_recipe = Recipe(
             title=recipe.title,
@@ -23,4 +23,3 @@ class CreateRecipeUseCase:
 
         self._repository.add(new_recipe)
 
-        return new_recipe
