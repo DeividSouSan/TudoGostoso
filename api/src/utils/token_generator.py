@@ -5,20 +5,20 @@ from jose import jwt
 
 
 class TokenGenerator:
-    def __init__(self, expiration_minutes: int = 30):
+    def __init__(self):
         from dotenv import load_dotenv
 
         load_dotenv()
 
-        self.__secret_key = os.getenv("SECRET_KEY")
-        self.__algorithm = os.getenv("ALGORITHM") or "HS256"
-        self.__expires = int(os.getenv("EXPIRATION_MINUTES")) or expiration_minutes
+        self.__secret_key: str = os.getenv("SECRET_KEY")
+        self.__algorithm: str = os.getenv("ALGORITHM") or "HS256"
+        self.__expires: float = float(os.getenv("EXPIRATION_MINUTES"))
 
     def generate(self, data: dict[str, str]):
         claims = data.copy()
 
-        expire = datetime.now(UTC) + timedelta(minutes=self.__expires)
-        claims.update({"exp": expire})
+        expire = datetime.now(UTC) + timedelta(minutes=float(self.__expires))
+        claims["exp"] = expire
 
         encoded_jwt = jwt.encode(
             claims=claims,

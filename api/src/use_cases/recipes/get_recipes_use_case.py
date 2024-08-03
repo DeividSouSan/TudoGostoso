@@ -8,7 +8,7 @@ class GetRecipesUseCase:
     def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)):
         self._repository = repository
 
-    def execute(self, title: str) -> list[Recipe | None]:
+    def execute(self, title: str) -> list[Recipe]:
         if title:
             return self._repository.get_by_title(title)
 

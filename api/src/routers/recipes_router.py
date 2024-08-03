@@ -16,62 +16,52 @@ recipes_router = APIRouter(prefix="/recipes", tags=["recipes"])
 
 @recipes_router.get("")
 async def get(
-        title: str | None = None,
-        token: dict[str, str] = Depends(get_authorization_token),
+        title: str = "",
+        current_user: dict[str, str] = Depends(get_authorization_token),
         use_case: GetRecipesUseCase = Depends(GetRecipesUseCase),
-) -> JSONResponse:
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "You are not authorized to view recipes."},
-        )
+) -> dict:
 
     recipes = use_case.execute(title)
 
     if recipes:
         recipes = [RecipeResponseDTO(user) for user in recipes]
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"recipes": jsonable_encoder(recipes)}
-    )
+    return {
+        "recipes": recipes
+    }
 
 
 @recipes_router.post("")
 async def create(
         recipe: RecipeCreateRequestDTO,
-        token: dict[str, str] = Depends(get_authorization_token),
+        current_user: dict[str, str] = Depends(get_authorization_token),
         use_case: CreateRecipeUseCase = Depends(CreateRecipeUseCase),
-) -> JSONResponse:
-    if token["role"] not in ["user"]:
+) -> dict:
+    if current_user["role"] != "user":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"message": "You are not authorized to create a recipe."},
         )
 
-    use_case.execute(recipe, token["id_user"])
+    use_case.execute(recipe, current_user["id"])
 
-    return JSONResponse(
-        status_code=status.HTTP_201_CREATED,
-        content={"message": "Recipe created successfully"},
-    )
+    return {
+        "message": "Recipe created successfully"
+    }
 
 
 @recipes_router.delete("")
 async def delete(
-        recipe_id: UUID | None = None,
-        token: dict[str, str] = Depends(get_authorization_token),
+        recipe_id: UUID | str,
+        current_user: dict[str, str] = Depends(get_authorization_token),
         use_case: DeleteRecipeUseCase = Depends(DeleteRecipeUseCase)
-) -> JSONResponse:
-    if token["role"] not in ["user", "admin"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "You are not authorized to create a recipe."},
-        )
+) -> dict:
 
-    use_case.execute(token, recipe_id)  # talvez passar só o role já fosse suficiente
+    if isinstance(recipe_id, str):
+        recipe_id = UUID(recipe_id)
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Recipe deleted successfully."}
-    )
+    use_case.execute(current_user, recipe_id)
+
+    return {
+        "message": "Recipe deleted successfully"
+    }

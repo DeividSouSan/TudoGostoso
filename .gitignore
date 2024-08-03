@@ -2,3 +2,6 @@
 **/.vscode/
 **/__pycache__/
 **/.env
+**/.idea/
+**/.zed/
+**/mock.txt
