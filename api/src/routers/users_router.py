@@ -67,3 +67,12 @@ async def search(
     return {
         "users": users
     }
+
+@users_router.delete("/{id:uuid}")
+async def delete(
+        username: str = "",
+        current_user: dict[str, str] = Depends(get_authorization_token),
+        use_case: SearchUser = Depends(SearchUser)
+) -> dict:
+
+    pass
