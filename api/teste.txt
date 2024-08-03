@@ -1,6 +1,0 @@
-{
-  "fullname": "Deivid Souza Santana",
-  "email": "deividsantana2013@gmail.com",
-  "username": "Deividollar",
-  "password": "30112003Deivid!"
-}
