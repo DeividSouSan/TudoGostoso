@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from ..utils.exceptions import UserAlreadyExists
+from ..utils.exceptions import *
 
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
@@ -20,11 +20,21 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
     "/register",
     summary="Registers a new user account.",
     description="Registers a new deactivated user account into the database.",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_201_CREATED: {
+            "description": "User account created. Access email to activate."
+
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "User account already exists."
+        },
+    },
 )
 async def register(
     user: UserRegisterRequestDTO,
     use_case: RegisterUser = Depends(RegisterUser),
-) -> JSONResponse:
+) -> dict:
     """
     Registers a new user account into the database.
 
@@ -33,52 +43,71 @@ async def register(
     try:
         use_case.execute(user)
 
-        return JSONResponse(
-            status_code=status.HTTP_201_CREATED,
-            content={"message": "User account created. Access email to activate."},
-        )
-    # Adicionar o tratamento de erros aqui
+        return {
+            "message": "User account created. Access email to activate."
+            }
+    except UserAlreadyExists as e:
+        raise HTTPException(status_code=400, detail="User account already exists.")
+
 
 @auth_router.post("/register/{activation_code:str}",
                   summary="Activates a new user account.",
-                  description="Activates a new user account by verifying the activation code sent to the user's email.")
+                  description="Activates a new user account by verifying the activation code sent to the user's email.",
+                  status_code=status.HTTP_200_OK,
+                  responses={
+                      status.HTTP_200_OK: {
+                          "description": "User account activated."
+
+                      },
+                      status.HTTP_400_BAD_REQUEST: {
+                          "description": "User account already exists."
+                      },
+                  },)
 async def activate_account(
-    activation_code: str,  
+    activation_code: str,
     use_case: ActivateAccount = Depends(ActivateAccount),
-) -> JSONResponse:
+) -> dict:
     """
     Activates a user account by verifying the activation code sent to the user's email.
     """
     try:
         use_case.execute(activation_code)
 
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"message": "User account activated."},
-        )
-    except HTTPException as e:
-        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
-    # Melhorar o tratamento de erros.
+        return {
+            "message": "User account activated."
+            }
+    except AccountAlreadyActive as e:
+        raise HTTPException(status_code=400, detail="Account already active.")
+
 
 @auth_router.post("/login",
                   summary="Authenticate a user.",
-                  description="Authenticate a user by providing their email and password.")
+                  description="Authenticate a user by providing their email and password.",
+                  status_code=status.HTTP_200_OK,
+                  responses={
+                      status.HTTP_200_OK: {
+                          "description": "User authorized."
+
+                      },
+                      status.HTTP_403_FORBIDDEN: {
+                          "description": "Credentials are invalid."
+                      },
+                  },)
 async def login(
     user: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
     use_case: LoginUser = Depends(LoginUser),
-) -> JSONResponse:
+) -> dict:
     """
-    Logs in a user and returns an authorization token.
+    Logs in a user with email and password and returns an authorization token.
     """
 
     try:
         user = UserLoginRequestDTO(email=user.username, password=user.password)
         token = use_case.execute(user)
 
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"message": "User authorized.", "token": token},
-        )
+        return {
+            "message": "User authorized.", 
+            "token": token
+            }
     except HTTPException as e:
-        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
-    ## Melhorar o tratamento de erros.
+        raise HTTPException(status_code=403, detail="Credentials are invalid.")
