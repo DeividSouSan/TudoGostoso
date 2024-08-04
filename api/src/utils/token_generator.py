@@ -21,18 +21,14 @@ class TokenGenerator:
         claims["exp"] = expire
 
         encoded_jwt = jwt.encode(
-            claims=claims,
-            key=self.__secret_key,
-            algorithm=self.__algorithm
+            claims=claims, key=self.__secret_key, algorithm=self.__algorithm
         )
 
         return encoded_jwt
 
     def verify(self, token: str) -> dict[str, str]:
         decoded_jwt = jwt.decode(
-            token=token,
-            key=self.__secret_key,
-            algorithms=[self.__algorithm]
+            token=token, key=self.__secret_key, algorithms=[self.__algorithm]
         )
 
         return decoded_jwt

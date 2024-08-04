@@ -1,6 +1,8 @@
+from fastapi import Depends
+
 from ...models.users import User
 from ...repositories.user_repository import UserRepository
-from fastapi import Depends
+
 
 class SearchUser:
     def __init__(self, user_repository: UserRepository = Depends(UserRepository)):

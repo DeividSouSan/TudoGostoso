@@ -1,8 +1,8 @@
 from pydantic import UUID4, BaseModel, EmailStr, Field, field_validator
 from typing_extensions import Annotated
 
-from ..recipe.recipe_response_dto import RecipeResponseDTO
 from ...models.users import User
+from ..recipe.recipe_response_dto import RecipeResponseDTO
 
 
 class UserResponseDTO(BaseModel):

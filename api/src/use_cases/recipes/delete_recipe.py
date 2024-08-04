@@ -6,14 +6,16 @@ from ...repositories.recipe_repository import RecipeRepository
 from ...utils.exceptions import *
 
 
-class DeleteRecipeUseCase:
-    def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)) -> None:
+class DeleteRecipe:
+    def __init__(
+        self, repository: RecipeRepository = Depends(RecipeRepository)
+    ) -> None:
         self._repository = repository
 
     def execute(
-            self,
-            current_user: dict,
-            recipe_id: UUID,
+        self,
+        current_user: dict,
+        recipe_id: UUID,
     ) -> None:
         recipe = self._repository.get_by_id(recipe_id)
 

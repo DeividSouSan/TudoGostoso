@@ -1,9 +1,10 @@
 from fastapi import Depends, HTTPException
 
 from ...repositories.user_repository import UserRepository
+from ...utils.exceptions import AccountAlreadyActive
 
 
-class ActivateAccountUseCase:
+class ActivateAccount:
     def __init__(self, respository: UserRepository = Depends(UserRepository)):
         self.__repository = respository
 
@@ -11,10 +12,7 @@ class ActivateAccountUseCase:
         user = self.__repository.get_by_activation_code(code)
 
         if user is None:
-            raise HTTPException(
-                status_code=400,
-                detail="Account already activated or invalid activation code."
-            )
+            raise AccountAlreadyActive()
 
         user.active = True
         user.activation_code = None

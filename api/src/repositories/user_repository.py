@@ -16,6 +16,10 @@ class UserRepository:
         self.__session.add(user)
         self.__session.commit()
 
+    def delete(self, user: User) -> None:
+        self.__session.delete(user)
+        self.__session.commit
+
     def all(self) -> list[User]:
         return self.__session.query(User).all()
 

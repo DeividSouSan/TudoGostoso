@@ -8,14 +8,16 @@ from ...utils.token_generator import TokenGenerator
 from ...utils.exceptions import UserNotFound, WrongPassword
 
 
-class LoginUserUseCase:
+class LoginUser:
     def __init__(
         self,
         repository: UserRepository = Depends(UserRepository),
         token_handler: TokenGenerator = Depends(TokenGenerator),
+        password_hasher: PasswordHasher = Depends(PasswordHasher)
     ):
         self._repository = repository
         self._token_handler = token_handler
+        self._password_hasher = password_hasher
 
     def execute(self, user: UserLoginRequestDTO) -> str:
         user_db = self._repository.get_by_email(user.email)
@@ -23,12 +25,12 @@ class LoginUserUseCase:
         if user_db is None:
             raise UserNotFound()
 
-        if not PasswordHasher.verify(user.password, user_db.password_hash):
+        if not self._password_hasher.verify(user.password, user_db.password_hash):
             raise WrongPassword()
 
         return self._token_handler.generate(
             {
-                "id": jsonable_encoder(user_db.id_user),
-                "role": jsonable_encoder(user_db.role),
+                "id": str(user_db.id_user),
+                "role": str(user_db.role),
             }
         )
