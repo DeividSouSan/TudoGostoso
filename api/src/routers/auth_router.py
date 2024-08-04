@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from ..utils.exceptions import UserAlreadyExists
+
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ..use_cases.auth.activate_account import ActivateAccount
@@ -35,10 +37,13 @@ async def register(
             status_code=status.HTTP_201_CREATED,
             content={"message": "User account created. Access email to activate."},
         )
+    # Adicionar o tratamento de erros aqui
 
-@auth_router.post("/register/{activation_code:str}")
+@auth_router.post("/register/{activation_code:str}",
+                  summary="Activates a new user account.",
+                  description="Activates a new user account by verifying the activation code sent to the user's email.")
 async def activate_account(
-    activation_code: str,  # Pydantic poderia validar esse parâmetro
+    activation_code: str,  
     use_case: ActivateAccount = Depends(ActivateAccount),
 ) -> JSONResponse:
     """
@@ -53,10 +58,11 @@ async def activate_account(
         )
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
+    # Melhorar o tratamento de erros.
 
-
-
-@auth_router.post("/login")
+@auth_router.post("/login",
+                  summary="Authenticate a user.",
+                  description="Authenticate a user by providing their email and password.")
 async def login(
     user: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
     use_case: LoginUser = Depends(LoginUser),
@@ -75,3 +81,4 @@ async def login(
         )
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
+    ## Melhorar o tratamento de erros.
