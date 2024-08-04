@@ -109,5 +109,7 @@ async def login(
             "message": "User authorized.", 
             "token": token
             }
-    except HTTPException as e:
-        raise HTTPException(status_code=403, detail="Credentials are invalid.")
+    except UserNotFound as e:
+        raise HTTPException(status_code=403, detail="Email not found.")
+    except WrongPassword as e:
+        raise HTTPException(status_code=403, detail="Password is incorrect.")
