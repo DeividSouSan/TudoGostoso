@@ -21,17 +21,16 @@ class UserRepository:
         self.__session.commit
 
     def all(self) -> list[User]:
-        return self.__session.query(User).all()
+        return self.__session.query(User).filter(User.active).all()
 
     def get_by_id(self, id: UUID) -> User | None:
-        return self.__session.query(User).filter(User.id_user == id).first()
+        return self.__session.query(User).filter(User.id_user == id and User.active).first()
 
     def get_by_email(self, email: str) -> User | None:
-        return self.__session.query(User).filter(User.email == email).first()
+        return self.__session.query(User).filter(User.email == email and User.active).first()
 
     def search(self, username: str) -> list[User]:
-        query = self.__session.query(User).filter(User.username.ilike(f"%{username}%"))
-        return query.all()
+        return self.__session.query(User).filter(User.username.ilike(f"%{username}%") and User.active).all()
 
     def get_by_activation_code(self, token: str) -> User | None:
         return self.__session.query(User).where(User.activation_code == token).first()
