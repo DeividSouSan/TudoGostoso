@@ -35,11 +35,6 @@ async def register(
     user: UserRegisterRequestDTO,
     use_case: RegisterUser = Depends(RegisterUser),
 ) -> dict:
-    """
-    Registers a new user account into the database.
-
-    Note: the account is not activated until the user verifies the activation code sent to their email.
-    """
     try:
         use_case.execute(user)
 
@@ -69,9 +64,6 @@ async def activate_account(
     activation_code: str,
     use_case: ActivateAccount = Depends(ActivateAccount),
 ) -> dict:
-    """
-    Activates a user account by verifying the activation code sent to the user's email.
-    """
     try:
         use_case.execute(activation_code)
 
@@ -101,10 +93,6 @@ async def login(
     user: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
     use_case: LoginUser = Depends(LoginUser),
 ) -> dict:
-    """
-    Logs in a user with email and password and returns an authorization token.
-    """
-
     try:
         user = UserLoginRequestDTO(email=user.username, password=user.password)
         token = use_case.execute(user)
