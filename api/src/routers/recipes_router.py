@@ -22,21 +22,19 @@ recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
     "",
     summary="List all recipes",
     description="List all recipes in the database.",
+    dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
+    response_model=list[RecipeResponseDTO],
     responses={
         status.HTTP_200_OK: {
             "description": "All recipes listed successfully."
-
         }
     }
 )
 async def get_all(
     use_case: GetAllRecipes = Depends(GetAllRecipes),
-    token = Depends(oauth2_scheme)
 ) -> dict:
     recipes = use_case.execute()
-
-    recipes = [RecipeResponseDTO(user) for user in recipes]
 
     return {
         "recipes": recipes
@@ -47,7 +45,9 @@ async def get_all(
     "/{recipe_id:uuid}",
     summary="List a specific recipe by ID.",
     description="List a specific recipe in the database by ID.",
+    dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
+    response_model=RecipeResponseDTO,
     responses={
         status.HTTP_200_OK: {
             "description": "Recipe found."
@@ -60,25 +60,27 @@ async def get_all(
 async def get(
     recipe_id: UUID,
     use_case: GetRecipe = Depends(GetRecipe),
-    token = Depends(oauth2_scheme)
 ) -> dict:
     try:
         recipe = use_case.execute(recipe_id)
 
-        recipe = RecipeResponseDTO(recipe)
-
         return {
             "recipe": recipe
         }
-    except RecipeNotFound as e:
-        raise HTTPException(status_code=404, detail="Recipe not found.")
+    except RecipeNotFound:
+        raise HTTPException(
+            status_code=404,
+            detail="Recipe not found."
+        )
 
 
 @recipes_router.get(
-    "search",
+    "/search",
     summary="Search for a recipe.",
     description="Search for a recipe by it's title.",
+    dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
+    response_model=list[RecipeResponseDTO],
     responses={
         status.HTTP_200_OK: {
             "description": "Search successful."
@@ -88,13 +90,9 @@ async def get(
 async def search(
     title: str,
     use_case: SearchRecipe = Depends(SearchRecipe),
-    token = Depends(oauth2_scheme)
 ) -> dict:
 
     recipes = use_case.execute(title)
-
-    if recipes:
-        recipes = [RecipeResponseDTO(user) for user in recipes]
 
     return {
         "recipes": recipes
@@ -119,17 +117,12 @@ async def create(
     title = Form(...),
     description = Form(...),
     use_case: CreateRecipe = Depends(CreateRecipe),
-    token = Depends(oauth2_scheme)
+    current_user_token = Depends(oauth2_scheme)
 ) -> dict:
-    if token["role"] != "user":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={"message": "You are not authorized to create a recipe."},
-        )
-
+    
     recipe = RecipeCreateRequestDTO(title, description)
 
-    use_case.execute(recipe, token["id"])
+    use_case.execute(recipe, current_user_token["id_user"])
 
     return {
         "message": "Recipe created successfully"
@@ -156,15 +149,21 @@ async def create(
 async def delete(
     recipe_id: UUID,
     use_case: DeleteRecipe = Depends(DeleteRecipe),
-    token = Depends(oauth2_scheme)
+    current_user_token = Depends(oauth2_scheme)
 ) -> dict:
     try:
-        use_case.execute(token, recipe_id)
+        use_case.execute(current_user_token["role"], current_user_token["id"], recipe_id)
 
         return {
             "message": "Recipe deleted successfully."
         }
-    except RecipeNotFound as e:
-        raise HTTPException(status_code=404, detail="Recipe not found.")
-    except UnauthorizedRecipeDelete as e:
-        raise HTTPException(status_code=403, detail="You are not authorized to delete this recipe.")
+    except RecipeNotFound:
+        raise HTTPException(
+            status_code=404, 
+            detail="Recipe not found."
+        )
+    except UnauthorizedRecipeDelete:
+        raise HTTPException(
+            status_code=403, 
+            detail="You are not authorized to delete this recipe."
+        )

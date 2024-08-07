@@ -12,10 +12,7 @@ class CreateRecipe:
     def __init__(self, repository: RecipeRepository = Depends(RecipeRepository)):
         self._repository = repository
 
-    def execute(self, recipe: RecipeCreateRequestDTO, user_id: UUID | str) -> None:
-
-        if isinstance(user_id, str):
-            user_id = UUID(user_id)
+    def execute(self, recipe: RecipeCreateRequestDTO, user_id: UUID) -> None:
 
         new_recipe = Recipe(
             title=recipe.title,
