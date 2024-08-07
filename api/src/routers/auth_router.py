@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from ..utils.exceptions import *
-
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ..use_cases.auth.activate_account import ActivateAccount
 from ..use_cases.auth.login_user import LoginUser
 from ..use_cases.auth.register_user import RegisterUser
+from ..utils.exceptions import *
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -24,11 +23,8 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
     responses={
         status.HTTP_201_CREATED: {
             "description": "User account created. Access email to activate."
-
         },
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "User account already exists."
-        },
+        status.HTTP_400_BAD_REQUEST: {"description": "User account already exists."},
     },
 )
 async def register(
@@ -38,9 +34,7 @@ async def register(
     try:
         use_case.execute(user)
 
-        return {
-            "message": "User account created. Access email to activate."
-            }
+        return {"message": "User account created. Access email to activate."}
     except UserAlreadyExists as e:
         raise HTTPException(status_code=400, detail="User account already exists.")
 
@@ -51,14 +45,9 @@ async def register(
     description="Activates a new user account by verifying the activation code sent to the user's email.",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_200_OK: {
-            "description": "User account activated."
-
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "User account already exists."
-        },
-    }
+        status.HTTP_200_OK: {"description": "User account activated."},
+        status.HTTP_400_BAD_REQUEST: {"description": "User account already exists."},
+    },
 )
 async def activate_account(
     activation_code: str,
@@ -67,9 +56,7 @@ async def activate_account(
     try:
         use_case.execute(activation_code)
 
-        return {
-            "message": "User account activated."
-            }
+        return {"message": "User account activated."}
     except AccountAlreadyActive as e:
         raise HTTPException(status_code=400, detail="Account already active.")
 
@@ -80,14 +67,9 @@ async def activate_account(
     description="Authenticate a user by providing their email and password.",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_200_OK: {
-            "description": "User authorized."
-
-        },
-        status.HTTP_403_FORBIDDEN: {
-            "description": "Credentials are invalid."
-        },
-    }
+        status.HTTP_200_OK: {"description": "User authorized."},
+        status.HTTP_403_FORBIDDEN: {"description": "Credentials are invalid."},
+    },
 )
 async def login(
     user: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
@@ -97,10 +79,7 @@ async def login(
         user = UserLoginRequestDTO(email=user.username, password=user.password)
         token = use_case.execute(user)
 
-        return {
-            "message": "User authorized.",
-            "token": token
-            }
+        return {"message": "User authorized.", "token": token}
     except UserNotFound as e:
         raise HTTPException(status_code=403, detail="Email not found.")
     except WrongPassword as e:

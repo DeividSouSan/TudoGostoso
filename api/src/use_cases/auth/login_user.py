@@ -3,9 +3,9 @@ from fastapi.encoders import jsonable_encoder
 
 from ...dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ...repositories.user_repository import UserRepository
+from ...utils.exceptions import UserNotFound, WrongPassword
 from ...utils.password_hasher import PasswordHasher
 from ...utils.token_generator import TokenGenerator
-from ...utils.exceptions import UserNotFound, WrongPassword
 
 
 class LoginUser:
@@ -13,7 +13,7 @@ class LoginUser:
         self,
         repository: UserRepository = Depends(UserRepository),
         token_handler: TokenGenerator = Depends(TokenGenerator),
-        password_hasher: PasswordHasher = Depends(PasswordHasher)
+        password_hasher: PasswordHasher = Depends(PasswordHasher),
     ):
         self._repository = repository
         self._token_handler = token_handler

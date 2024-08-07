@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.src.utils.exceptions import UnauthorizedAccountDelete
 
-from ..use_cases.users.delete_user import DeleteUser
 from ..dtos.user.user_response_dto import UserResponseDTO
 from ..routers.auth_router import oauth2_scheme
+from ..use_cases.users.delete_user import DeleteUser
 from ..use_cases.users.get_all_users import GetAllUsers
 from ..use_cases.users.get_user import GetUser
 from ..use_cases.users.search_user import SearchUser
@@ -22,11 +22,8 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     status_code=status.HTTP_200_OK,
     response_model=list[UserResponseDTO],
     responses={
-        status.HTTP_200_OK: {
-            "description": "Return a list of all active users."
-        },
-    }
-    
+        status.HTTP_200_OK: {"description": "Return a list of all active users."},
+    },
 )
 async def get_all(
     use_case: GetAllUsers = Depends(GetAllUsers),
@@ -34,9 +31,7 @@ async def get_all(
 
     users = use_case.execute()
 
-    return {
-        "users": users
-        }
+    return {"users": users}
 
 
 @users_router.get(
@@ -47,10 +42,8 @@ async def get_all(
     status_code=status.HTTP_200_OK,
     response_model=UserResponseDTO,
     responses={
-        status.HTTP_200_OK: {
-            "description": "Return the user that matches the id."
-        },
-    }
+        status.HTTP_200_OK: {"description": "Return the user that matches the id."},
+    },
 )
 async def get(
     id_user: UUID,
@@ -61,13 +54,10 @@ async def get(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    return {
-        "users": user
-        }
+    return {"users": user}
 
 
 @users_router.get(
@@ -81,7 +71,7 @@ async def get(
         status.HTTP_200_OK: {
             "description": "Return a list of users that match the search criteria."
         },
-    }
+    },
 )
 async def search(
     username: str,
@@ -93,9 +83,7 @@ async def search(
     if users:
         users = [UserResponseDTO(user) for user in users]
 
-    return {
-        "users": users
-        }
+    return {"users": users}
 
 
 @users_router.delete(
@@ -104,29 +92,22 @@ async def search(
     description="Delete a user by it's id.",
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_200_OK: {
-            "description": "User account deleted."
-
-        },
-        status.HTTP_403_FORBIDDEN: {
-            "description": "Unauthorized to delete account."
-        },
-    }
+        status.HTTP_200_OK: {"description": "User account deleted."},
+        status.HTTP_403_FORBIDDEN: {"description": "Unauthorized to delete account."},
+    },
 )
 async def delete(
     id_user: UUID,
     current_user_token: dict[str, str] = Depends(oauth2_scheme),
-    use_case: DeleteUser = Depends(DeleteUser)
+    use_case: DeleteUser = Depends(DeleteUser),
 ) -> dict:
     try:
         use_case.execute(id_user, current_user_token)
 
-        return {
-            "message": "User deleted"
-        }
+        return {"message": "User deleted"}
 
     except UnauthorizedAccountDelete as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized to delete account"
+            detail="Unauthorized to delete account",
         )
