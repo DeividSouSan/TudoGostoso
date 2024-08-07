@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -11,47 +11,82 @@ from ..use_cases.recipes.delete_recipe import DeleteRecipe
 from ..use_cases.recipes.get_all_recipes import GetAllRecipes
 from ..use_cases.recipes.get_recipe import GetRecipe
 from ..use_cases.recipes.search_recipe import SearchRecipe
-from ..utils.deps import get_authorization_token
+from ..utils.exceptions import *
 from ..routers.auth_router import oauth2_scheme
 
 
 recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
 
 
-@recipes_router.get("")
+@recipes_router.get(
+    "",
+    summary="List all recipes",
+    description="List all recipes in the database.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "All recipes listed successfully."
+
+        }
+    }
+)
 async def get_all(
-    current_user: dict[str, str] = Depends(get_authorization_token),
     use_case: GetAllRecipes = Depends(GetAllRecipes),
     token = Depends(oauth2_scheme)
 ) -> dict:
-
     recipes = use_case.execute()
 
-    if recipes:
-        recipes = [RecipeResponseDTO(user) for user in recipes]
+    recipes = [RecipeResponseDTO(user) for user in recipes]
 
-    return {"recipes": recipes}
+    return {
+        "recipes": recipes
+    }
 
 
-@recipes_router.get("/{recipe_id:uuid}")
+@recipes_router.get(
+    "/{recipe_id:uuid}",
+    summary="List a specific recipe by ID.",
+    description="List a specific recipe in the database by ID.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Recipe found."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Recipe not found."
+        }
+    }
+)
 async def get(
-    id: UUID,
-    current_user: dict[str, str] = Depends(get_authorization_token),
+    recipe_id: UUID,
     use_case: GetRecipe = Depends(GetRecipe),
     token = Depends(oauth2_scheme)
 ) -> dict:
+    try:
+        recipe = use_case.execute(recipe_id)
 
-    recipe = use_case.execute(id)
+        recipe = RecipeResponseDTO(recipe)
 
-    recipe = RecipeResponseDTO(recipe)
+        return {
+            "recipe": recipe
+        }
+    except RecipeNotFound as e:
+        raise HTTPException(status_code=404, detail="Recipe not found.")
 
-    return {"recipes": recipe}
 
-
-@recipes_router.get("search")
+@recipes_router.get(
+    "search",
+    summary="Search for a recipe.",
+    description="Search for a recipe by it's title.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Search successful."
+        }
+    }
+)
 async def search(
-    title: str = "",
-    current_user: dict[str, str] = Depends(get_authorization_token),
+    title: str,
     use_case: SearchRecipe = Depends(SearchRecipe),
     token = Depends(oauth2_scheme)
 ) -> dict:
@@ -61,38 +96,75 @@ async def search(
     if recipes:
         recipes = [RecipeResponseDTO(user) for user in recipes]
 
-    return {"recipes": recipes}
+    return {
+        "recipes": recipes
+    }
 
 
-@recipes_router.post("")
+@recipes_router.post(
+    "",
+    summary="Create a new recipe",
+    description="Create a new recipe in the database.",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_201_CREATED: {
+            "description": "Recipe created successfully."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "You are not authorized to create a recipe."
+        }
+    }
+)
 async def create(
-    recipe: RecipeCreateRequestDTO,
-    current_user: dict[str, str] = Depends(get_authorization_token),
+    title = Form(...),
+    description = Form(...),
     use_case: CreateRecipe = Depends(CreateRecipe),
     token = Depends(oauth2_scheme)
 ) -> dict:
-    if current_user["role"] != "user":
+    if token["role"] != "user":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"message": "You are not authorized to create a recipe."},
         )
 
-    use_case.execute(recipe, current_user["id"])
+    recipe = RecipeCreateRequestDTO(title, description)
 
-    return {"message": "Recipe created successfully"}
+    use_case.execute(recipe, token["id"])
+
+    return {
+        "message": "Recipe created successfully"
+    }
 
 
-@recipes_router.delete("")
+@recipes_router.delete(
+    "/{recipe_id:uuid}",
+    summary="Delete a recipe",
+    description="Create a new recipe in the database.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Recipe created successfully."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "You are not authorized to delete this recipe."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Recipe not found."
+        }
+    }
+)
 async def delete(
-    recipe_id: UUID | str,
-    current_user: dict[str, str] = Depends(get_authorization_token),
+    recipe_id: UUID,
     use_case: DeleteRecipe = Depends(DeleteRecipe),
     token = Depends(oauth2_scheme)
 ) -> dict:
+    try:
+        use_case.execute(token, recipe_id)
 
-    if isinstance(recipe_id, str):
-        recipe_id = UUID(recipe_id)
-
-    use_case.execute(current_user, recipe_id)
-
-    return {"message": "Recipe deleted successfully"}
+        return {
+            "message": "Recipe deleted successfully."
+        }
+    except RecipeNotFound as e:
+        raise HTTPException(status_code=404, detail="Recipe not found.")
+    except UnauthorizedRecipeDelete as e:
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this recipe.")
