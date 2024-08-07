@@ -19,7 +19,14 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     summary="Get all active users",
     description="Get all users that have an active account.",
     dependencies=[Depends(oauth2_scheme)],
+    status_code=status.HTTP_200_OK,
     response_model=list[UserResponseDTO],
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Return a list of all active users."
+        },
+    }
+    
 )
 async def get_all(
     use_case: GetAllUsers = Depends(GetAllUsers),
@@ -27,29 +34,40 @@ async def get_all(
 
     users = use_case.execute()
 
-    return {"users": users}
+    return {
+        "users": users
+        }
 
 
 @users_router.get(
     "/{id_user:uuid}",
     summary="Get user by id",
     description="Get a user by its unique UUID id.",
-    response_model=UserResponseDTO,
     dependencies=[Depends(oauth2_scheme)],
+    status_code=status.HTTP_200_OK,
+    response_model=UserResponseDTO,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Return the user that matches the id."
+        },
+    }
 )
 async def get(
     id_user: UUID,
     use_case: GetUser = Depends(GetUser),
-) -> any:
+) -> dict:
 
     user = use_case.execute(id_user)
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="User not found"
         )
 
-    return {"users": user}
+    return {
+        "users": user
+        }
 
 
 @users_router.get(
@@ -57,10 +75,16 @@ async def get(
     summary="Search for users by parameters",
     description="Search for users by username or email.",
     dependencies=[Depends(oauth2_scheme)],
+    status_code=status.HTTP_200_OK,
     response_model=dict[str, list[UserResponseDTO]],
+    responses={
+        status.HTTP_200_OK: {
+            "description": "Return a list of users that match the search criteria."
+        },
+    }
 )
 async def search(
-    username: str = "",
+    username: str,
     use_case: SearchUser = Depends(SearchUser),
 ) -> dict:
 
@@ -69,14 +93,15 @@ async def search(
     if users:
         users = [UserResponseDTO(user) for user in users]
 
-    return {"users": users}
+    return {
+        "users": users
+        }
 
 
 @users_router.delete(
     "/{id_user:uuid}",
     summary="Delete a user from the database",
     description="Delete a user by it's id.",
-    response_model=dict[str, list[UserResponseDTO]],
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
