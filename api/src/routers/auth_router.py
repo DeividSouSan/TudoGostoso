@@ -50,19 +50,21 @@ async def register(
         raise HTTPException(status_code=400, detail="User account already exists.")
 
 
-@auth_router.post("/register/{activation_code:str}",
-                  summary="Activates a new user account.",
-                  description="Activates a new user account by verifying the activation code sent to the user's email.",
-                  status_code=status.HTTP_200_OK,
-                  responses={
-                      status.HTTP_200_OK: {
-                          "description": "User account activated."
+@auth_router.post(
+    "/register/{activation_code:str}",
+    summary="Activates a new user account.",
+    description="Activates a new user account by verifying the activation code sent to the user's email.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "User account activated."
 
-                      },
-                      status.HTTP_400_BAD_REQUEST: {
-                          "description": "User account already exists."
-                      },
-                  },)
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "User account already exists."
+        },
+    }
+)
 async def activate_account(
     activation_code: str,
     use_case: ActivateAccount = Depends(ActivateAccount),
@@ -80,19 +82,21 @@ async def activate_account(
         raise HTTPException(status_code=400, detail="Account already active.")
 
 
-@auth_router.post("/login",
-                  summary="Authenticate a user.",
-                  description="Authenticate a user by providing their email and password.",
-                  status_code=status.HTTP_200_OK,
-                  responses={
-                      status.HTTP_200_OK: {
-                          "description": "User authorized."
+@auth_router.post(
+    "/login",
+    summary="Authenticate a user.",
+    description="Authenticate a user by providing their email and password.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {
+            "description": "User authorized."
 
-                      },
-                      status.HTTP_403_FORBIDDEN: {
-                          "description": "Credentials are invalid."
-                      },
-                  },)
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Credentials are invalid."
+        },
+    }
+)
 async def login(
     user: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
     use_case: LoginUser = Depends(LoginUser),
@@ -106,7 +110,7 @@ async def login(
         token = use_case.execute(user)
 
         return {
-            "message": "User authorized.", 
+            "message": "User authorized.",
             "token": token
             }
     except UserNotFound as e:
