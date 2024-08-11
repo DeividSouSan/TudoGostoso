@@ -24,4 +24,6 @@ class IUserRepository(ABC):
     @abstractmethod
     def get_by_activation_code(self, code: str) -> User | None: ...
 
+    @abstractmethod
+    def activate_account(self, user: User) -> None: ...
    
