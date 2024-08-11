@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from ...contracts.recipe_repository import IRecipeRepository
-
 from ...utils.exceptions import RecipeNotFound, UnauthorizedRecipeDelete
 
 
@@ -10,7 +9,10 @@ class DeleteRecipe:
         self._repository = repository
 
     def execute(
-        self, current_user_role: str, current_user_id: UUID, recipe_id: UUID,
+        self,
+        current_user_role: str,
+        current_user_id: UUID,
+        recipe_id: UUID,
     ) -> None:
         recipe = self._repository.get_by_id(recipe_id)
 

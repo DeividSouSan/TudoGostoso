@@ -1,5 +1,4 @@
 from ...contracts.recipe_repository import IRecipeRepository
-
 from ...models.recipes import Recipe
 
 

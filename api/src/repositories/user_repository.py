@@ -5,7 +5,6 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from ..contracts.user_repository import IUserRepository
-
 from ..models.users import User
 from ..utils.deps import get_db
 
@@ -52,5 +51,5 @@ class UserRepository(IUserRepository):
     def activate_account(self, user: User) -> None:
         user.active = True
         user.activation_code = None
-        
+
         self.__session.commit()

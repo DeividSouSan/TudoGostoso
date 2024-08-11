@@ -10,7 +10,7 @@ class IRecipeRepository(ABC):
 
     @abstractmethod
     def delete(self, recipe: Recipe) -> None: ...
-    
+
     @abstractmethod
     def all(self) -> list[Recipe]: ...
 
@@ -22,4 +22,3 @@ class IRecipeRepository(ABC):
 
     @abstractmethod
     def get_by_user_id(self, user_id: UUID) -> list[Recipe]: ...
-

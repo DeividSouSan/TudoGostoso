@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from ...contracts.recipe_repository import IRecipeRepository
-
 from ...models.recipes import Recipe
 from ...utils.exceptions import RecipeNotFound
 

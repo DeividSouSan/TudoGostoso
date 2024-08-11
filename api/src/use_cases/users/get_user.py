@@ -1,7 +1,6 @@
 from uuid import UUID
 
 from ...contracts.user_repository import IUserRepository
-
 from ...models.users import User
 
 

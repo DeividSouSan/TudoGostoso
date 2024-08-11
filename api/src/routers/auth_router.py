@@ -5,18 +5,16 @@ from ..contracts.email_sender import IEmailSender
 from ..contracts.password_hasher import IPasswordHasher
 from ..contracts.token_generator import ITokenGenerator
 from ..contracts.user_repository import IUserRepository
-from ..utils.email_sender import EmailSender
-from ..utils.password_hasher import PasswordHasher
-from ..utils.token_generator import TokenGenerator
-
-from ..repositories.user_repository import UserRepository
-
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
+from ..repositories.user_repository import UserRepository
 from ..use_cases.auth.activate_account import ActivateAccount
 from ..use_cases.auth.login_user import LoginUser
 from ..use_cases.auth.register_user import RegisterUser
+from ..utils.email_sender import EmailSender
 from ..utils.exceptions import *
+from ..utils.password_hasher import PasswordHasher
+from ..utils.token_generator import TokenGenerator
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -50,10 +48,7 @@ async def register(
 
         return {"message": "User account created. Access email to activate."}
     except UserAlreadyExists:
-        raise HTTPException(
-            status_code=400,
-            detail="User account already exists."
-        )
+        raise HTTPException(status_code=400, detail="User account already exists.")
 
 
 @auth_router.post(
@@ -71,7 +66,7 @@ async def activate_account(
     repository: IUserRepository = Depends(UserRepository),
 ) -> dict:
     use_case = ActivateAccount(repository)
-    
+
     try:
         use_case.execute(activation_code)
 
@@ -97,7 +92,7 @@ async def login(
     password_hasher: IPasswordHasher = Depends(PasswordHasher),
 ) -> dict:
     use_case = LoginUser(repository, token_handler, password_hasher)
-    
+
     try:
         user = UserLoginRequestDTO(email=user.username, password=user.password)
         token = use_case.execute(user)

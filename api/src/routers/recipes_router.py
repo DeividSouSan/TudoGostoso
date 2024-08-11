@@ -3,10 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 
 from ..contracts.recipe_repository import IRecipeRepository
-from ..repositories.recipe_repository import RecipeRepository
-
 from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
+from ..repositories.recipe_repository import RecipeRepository
 from ..routers.auth_router import oauth2_scheme
 from ..use_cases.recipes.create_recipe import CreateRecipe
 from ..use_cases.recipes.delete_recipe import DeleteRecipe
@@ -25,8 +24,7 @@ recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
     response_model=list[RecipeResponseDTO],
-    responses={status.HTTP_200_OK: {
-        "description": "All recipes listed successfully."}},
+    responses={status.HTTP_200_OK: {"description": "All recipes listed successfully."}},
 )
 async def get_all(
     repository: IRecipeRepository = Depends(RecipeRepository),
@@ -73,8 +71,7 @@ async def get(
     responses={status.HTTP_200_OK: {"description": "Search successful."}},
 )
 async def search(
-    title: str,
-    repository: IRecipeRepository = Depends(RecipeRepository)
+    title: str, repository: IRecipeRepository = Depends(RecipeRepository)
 ) -> dict:
     use_case = SearchRecipe(repository)
     recipes = use_case.execute(title)
@@ -102,7 +99,7 @@ async def create(
 ) -> dict:
     recipe = RecipeCreateRequestDTO(title, description)
 
-    use_case = CreateRecipe(repository),
+    use_case = (CreateRecipe(repository),)
     use_case.execute(recipe, current_user["id_user"])
 
     return {"message": "Recipe created successfully"}
@@ -124,14 +121,12 @@ async def create(
 async def delete(
     recipe_id: UUID,
     repository: IRecipeRepository = Depends(RecipeRepository),
-    current_user = Depends(oauth2_scheme),
+    current_user=Depends(oauth2_scheme),
 ) -> dict:
     use_case = DeleteRecipe(repository)
-    
+
     try:
-        use_case.execute(
-            current_user["role"], current_user["id"], recipe_id
-        )
+        use_case.execute(current_user["role"], current_user["id"], recipe_id)
 
         return {"message": "Recipe deleted successfully."}
     except RecipeNotFound:

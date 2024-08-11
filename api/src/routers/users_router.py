@@ -3,16 +3,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..contracts.user_repository import IUserRepository
-from ..repositories.user_repository import UserRepository
-
-from ..utils.exceptions import UnauthorizedAccountDelete
-
 from ..dtos.user.user_response_dto import UserResponseDTO
+from ..repositories.user_repository import UserRepository
 from ..routers.auth_router import oauth2_scheme
 from ..use_cases.users.delete_user import DeleteUser
 from ..use_cases.users.get_all_users import GetAllUsers
 from ..use_cases.users.get_user import GetUser
 from ..use_cases.users.search_user import SearchUser
+from ..utils.exceptions import UnauthorizedAccountDelete
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -50,8 +48,7 @@ async def get_all(
     },
 )
 async def get(
-    id_user: UUID,
-    repository: IUserRepository = Depends(UserRepository)
+    id_user: UUID, repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
     use_case = GetUser(repository)
     user = use_case.execute(id_user)
@@ -78,10 +75,9 @@ async def get(
     },
 )
 async def search(
-    username: str,
-    repository: IUserRepository = Depends(UserRepository)
+    username: str, repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-    use_case = SearchUser(repository),
+    use_case = (SearchUser(repository),)
     users = use_case.execute(username)
 
     if users:
@@ -106,7 +102,7 @@ async def delete(
     current_user: dict[str, str] = Depends(oauth2_scheme),
 ) -> dict:
     use_case = DeleteUser(repository)
-    
+
     try:
         use_case.execute(id_user, current_user)
 
