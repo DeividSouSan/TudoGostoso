@@ -1,19 +1,16 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.encoders import jsonable_encoder
-
+from ...contracts.password_hasher import IPasswordHasher
+from ...contracts.token_generator import ITokenGenerator
+from ...contracts.user_repository import IUserRepository
 from ...dtos.user.user_login_request_dto import UserLoginRequestDTO
-from ...repositories.user_repository import UserRepository
 from ...utils.exceptions import UserNotFound, WrongPassword
-from ...utils.password_hasher import PasswordHasher
-from ...utils.token_generator import TokenGenerator
 
 
 class LoginUser:
     def __init__(
         self,
-        repository: UserRepository = Depends(UserRepository),
-        token_handler: TokenGenerator = Depends(TokenGenerator),
-        password_hasher: PasswordHasher = Depends(PasswordHasher),
+        repository: IUserRepository,
+        token_handler: ITokenGenerator,
+        password_hasher: IPasswordHasher
     ):
         self._repository = repository
         self._token_handler = token_handler
