@@ -33,7 +33,7 @@ class RegisterUser:
             fullname=user.fullname,
             password_hash=self._password_hasher.hash(user.password),
             email=user.email,
-            activation_code=random.randint(100000, 999999),
+            activation_code=random.randint(100000, 999999), # Poderia ser uma classe
         )
 
         self._repository.add(new_user)
