@@ -1,6 +1,5 @@
 
 from ...contracts.user_repository import IUserRepository
-from ...repositories.user_repository import UserRepository
 from ...utils.exceptions import AccountAlreadyActive
 
 
