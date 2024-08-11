@@ -2,6 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from api.src.contracts.email_sender import IEmailSender
+from api.src.contracts.password_hasher import IPasswordHasher
+from api.src.contracts.user_repository import IUserRepository
+from api.src.utils.email_sender import EmailSender
+from api.src.utils.password_hasher import PasswordHasher
+
+from ..repositories.user_repository import UserRepository
+
 from ..dtos.user.user_login_request_dto import UserLoginRequestDTO
 from ..dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ..use_cases.auth.activate_account import ActivateAccount
@@ -29,14 +37,21 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 )
 async def register(
     user: UserRegisterRequestDTO,
-    use_case: RegisterUser = Depends(RegisterUser),
+    repository: IUserRepository = Depends(UserRepository),
+    password_hasher: IPasswordHasher = Depends(PasswordHasher),
+    email_sender: IEmailSender = Depends(EmailSender),
 ) -> dict:
+    
+    use_case = RegisterUser(repository, password_hasher, email_sender)
+        
     try:
         use_case.execute(user)
 
         return {"message": "User account created. Access email to activate."}
-    except UserAlreadyExists as e:
-        raise HTTPException(status_code=400, detail="User account already exists.")
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=400, 
+            detail="User account already exists.")
 
 
 @auth_router.post(

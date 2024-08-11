@@ -1,22 +1,22 @@
 import random
 
-from fastapi import Depends, HTTPException, status
-
+from ...contracts.email_sender import IEmailSender
+from ...contracts.password_hasher import IPasswordHasher
 from ...dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ...models.users import User
-from ...repositories.user_repository import UserRepository
-from ...utils.activation_code_email_sender import ActivationCodeEmailSender
 from ...utils.exceptions import UserAlreadyExists
-from ...utils.password_hasher import PasswordHasher
+
+from ...contracts.user_repository import IUserRepository
 
 
 class RegisterUser:
     def __init__(
         self,
-        repository: UserRepository = Depends(UserRepository),
-        password_hasher: PasswordHasher = Depends(PasswordHasher),
-        email_sender: ActivationCodeEmailSender = Depends(ActivationCodeEmailSender),
-    ):
+        repository: IUserRepository = None,
+        password_hasher: IPasswordHasher = None,
+        email_sender: IEmailSender = None,
+    ) -> None:
+        
         self._repository = repository
         self._password_hasher = password_hasher
         self._email_sender = email_sender
