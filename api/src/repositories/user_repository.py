@@ -49,3 +49,8 @@ class UserRepository(IUserRepository):
     def get_by_activation_code(self, token: str) -> User | None:
         return self.__session.query(User).where(User.activation_code == token).first()
 
+    def activate_account(self, user: User) -> None:
+        user.active = True
+        user.activation_code = None
+        
+        self.__session.commit()
