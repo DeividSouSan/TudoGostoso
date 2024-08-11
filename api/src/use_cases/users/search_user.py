@@ -1,12 +1,10 @@
-from fastapi import Depends
-
+from ...contracts.user_repository import IUserRepository
 from ...models.users import User
-from ...repositories.user_repository import UserRepository
 
 
 class SearchUser:
-    def __init__(self, user_repository: UserRepository = Depends(UserRepository)):
-        self.user_repository = user_repository
+    def __init__(self, repository: IUserRepository):
+        self._repository = repository
 
     def execute(self, username: str) -> list[User]:
-        return self.user_repository.search(username)
+        return self._repository.search(username)

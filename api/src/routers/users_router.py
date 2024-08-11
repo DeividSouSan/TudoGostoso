@@ -2,7 +2,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.src.utils.exceptions import UnauthorizedAccountDelete
+from ..contracts.user_repository import IUserRepository
+from ..repositories.user_repository import UserRepository
+
+from ..utils.exceptions import UnauthorizedAccountDelete
 
 from ..dtos.user.user_response_dto import UserResponseDTO
 from ..routers.auth_router import oauth2_scheme
@@ -26,9 +29,10 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     },
 )
 async def get_all(
-    use_case: GetAllUsers = Depends(GetAllUsers),
+    repository: IUserRepository = Depends(UserRepository),
 ) -> dict:
 
+    use_case = GetAllUsers(repository)
     users = use_case.execute()
 
     return {"users": users}
@@ -47,9 +51,9 @@ async def get_all(
 )
 async def get(
     id_user: UUID,
-    use_case: GetUser = Depends(GetUser),
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-
+    use_case = GetUser(repository)
     user = use_case.execute(id_user)
 
     if not user:
@@ -75,9 +79,9 @@ async def get(
 )
 async def search(
     username: str,
-    use_case: SearchUser = Depends(SearchUser),
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-
+    use_case = SearchUser(repository),
     users = use_case.execute(username)
 
     if users:
@@ -98,15 +102,17 @@ async def search(
 )
 async def delete(
     id_user: UUID,
-    current_user_token: dict[str, str] = Depends(oauth2_scheme),
-    use_case: DeleteUser = Depends(DeleteUser),
+    repository: IUserRepository = Depends(UserRepository),
+    current_user: dict[str, str] = Depends(oauth2_scheme),
 ) -> dict:
+    use_case = DeleteUser(repository)
+    
     try:
-        use_case.execute(id_user, current_user_token)
+        use_case.execute(id_user, current_user)
 
         return {"message": "User deleted"}
 
-    except UnauthorizedAccountDelete as e:
+    except UnauthorizedAccountDelete:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized to delete account",
