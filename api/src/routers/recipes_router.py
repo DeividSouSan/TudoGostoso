@@ -6,7 +6,7 @@ from ..contracts.recipe_repository import IRecipeRepository
 from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
 from ..repositories.recipe_repository import RecipeRepository
-from ..routers.auth_router import oauth2_scheme
+from ..routers.auth_router import token
 from ..use_cases.recipes.create_recipe import CreateRecipe
 from ..use_cases.recipes.delete_recipe import DeleteRecipe
 from ..use_cases.recipes.get_all_recipes import GetAllRecipes
@@ -21,7 +21,7 @@ recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
     "",
     summary="List all recipes",
     description="List all recipes in the database.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=list[RecipeResponseDTO],
     responses={status.HTTP_200_OK: {"description": "All recipes listed successfully."}},
@@ -39,7 +39,7 @@ async def get_all(
     "/{recipe_id:uuid}",
     summary="List a specific recipe by ID.",
     description="List a specific recipe in the database by ID.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=RecipeResponseDTO,
     responses={
@@ -65,7 +65,7 @@ async def get(
     "/search",
     summary="Search for a recipe.",
     description="Search for a recipe by it's title.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=list[RecipeResponseDTO],
     responses={status.HTTP_200_OK: {"description": "Search successful."}},
@@ -95,7 +95,7 @@ async def create(
     title=Form(...),
     description=Form(...),
     repository: IRecipeRepository = Depends(RecipeRepository),
-    current_user: dict = Depends(oauth2_scheme),
+    current_user: dict = Depends(token),
 ) -> dict:
     recipe = RecipeCreateRequestDTO(title, description)
 
@@ -121,7 +121,7 @@ async def create(
 async def delete(
     recipe_id: UUID,
     repository: IRecipeRepository = Depends(RecipeRepository),
-    current_user=Depends(oauth2_scheme),
+    current_user=Depends(token),
 ) -> dict:
     use_case = DeleteRecipe(repository)
 

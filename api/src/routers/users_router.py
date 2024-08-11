@@ -3,14 +3,16 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..contracts.user_repository import IUserRepository
-from ..dtos.user.user_response_dto import UserResponseDTO
 from ..repositories.user_repository import UserRepository
-from ..routers.auth_router import oauth2_scheme
+
+from ..utils.exceptions import UnauthorizedAccountDelete
+
+from ..dtos.user.user_response_dto import UserResponseDTO
+from ..routers.auth_router import token
 from ..use_cases.users.delete_user import DeleteUser
 from ..use_cases.users.get_all_users import GetAllUsers
 from ..use_cases.users.get_user import GetUser
 from ..use_cases.users.search_user import SearchUser
-from ..utils.exceptions import UnauthorizedAccountDelete
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -19,7 +21,7 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     "",
     summary="Get all active users",
     description="Get all users that have an active account.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=list[UserResponseDTO],
     responses={
@@ -40,7 +42,7 @@ async def get_all(
     "/{id_user:uuid}",
     summary="Get user by id",
     description="Get a user by its unique UUID id.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=UserResponseDTO,
     responses={
@@ -48,7 +50,8 @@ async def get_all(
     },
 )
 async def get(
-    id_user: UUID, repository: IUserRepository = Depends(UserRepository)
+    id_user: UUID,
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
     use_case = GetUser(repository)
     user = use_case.execute(id_user)
@@ -65,7 +68,7 @@ async def get(
     "/search",
     summary="Search for users by parameters",
     description="Search for users by username or email.",
-    dependencies=[Depends(oauth2_scheme)],
+    dependencies=[Depends(token)],
     status_code=status.HTTP_200_OK,
     response_model=dict[str, list[UserResponseDTO]],
     responses={
@@ -75,9 +78,10 @@ async def get(
     },
 )
 async def search(
-    username: str, repository: IUserRepository = Depends(UserRepository)
+    username: str,
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-    use_case = (SearchUser(repository),)
+    use_case = SearchUser(repository),
     users = use_case.execute(username)
 
     if users:
@@ -99,10 +103,10 @@ async def search(
 async def delete(
     id_user: UUID,
     repository: IUserRepository = Depends(UserRepository),
-    current_user: dict[str, str] = Depends(oauth2_scheme),
+    current_user: dict[str, str] = Depends(token),
 ) -> dict:
     use_case = DeleteUser(repository)
-
+    
     try:
         use_case.execute(id_user, current_user)
 

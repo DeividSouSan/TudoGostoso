@@ -16,7 +16,7 @@ from ..utils.exceptions import *
 from ..utils.password_hasher import PasswordHasher
 from ..utils.token_generator import TokenGenerator
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+token = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
