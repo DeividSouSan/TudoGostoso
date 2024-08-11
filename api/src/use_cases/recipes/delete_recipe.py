@@ -1,22 +1,16 @@
 from uuid import UUID
 
-from fastapi import Depends
+from ...contracts.recipe_repository import IRecipeRepository
 
-from ...repositories.recipe_repository import RecipeRepository
-from ...utils.exceptions import *
+from ...utils.exceptions import RecipeNotFound, UnauthorizedRecipeDelete
 
 
 class DeleteRecipe:
-    def __init__(
-        self, repository: RecipeRepository = Depends(RecipeRepository)
-    ) -> None:
+    def __init__(self, repository: IRecipeRepository) -> None:
         self._repository = repository
 
     def execute(
-        self,
-        current_user_role: str,
-        current_user_id: UUID,
-        recipe_id: UUID,
+        self, current_user_role: str, current_user_id: UUID, recipe_id: UUID,
     ) -> None:
         recipe = self._repository.get_by_id(recipe_id)
 

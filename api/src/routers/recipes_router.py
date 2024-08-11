@@ -1,8 +1,9 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+
+from ..contracts.recipe_repository import IRecipeRepository
+from ..repositories.recipe_repository import RecipeRepository
 
 from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
@@ -24,11 +25,13 @@ recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
     response_model=list[RecipeResponseDTO],
-    responses={status.HTTP_200_OK: {"description": "All recipes listed successfully."}},
+    responses={status.HTTP_200_OK: {
+        "description": "All recipes listed successfully."}},
 )
 async def get_all(
-    use_case: GetAllRecipes = Depends(GetAllRecipes),
+    repository: IRecipeRepository = Depends(RecipeRepository),
 ) -> dict:
+    use_case = GetAllRecipes(repository)
     recipes = use_case.execute()
 
     return {"recipes": recipes}
@@ -48,8 +51,10 @@ async def get_all(
 )
 async def get(
     recipe_id: UUID,
-    use_case: GetRecipe = Depends(GetRecipe),
+    repository: IRecipeRepository = Depends(RecipeRepository),
 ) -> dict:
+    use_case = GetRecipe(repository)
+
     try:
         recipe = use_case.execute(recipe_id)
 
@@ -69,9 +74,9 @@ async def get(
 )
 async def search(
     title: str,
-    use_case: SearchRecipe = Depends(SearchRecipe),
+    repository: IRecipeRepository = Depends(RecipeRepository)
 ) -> dict:
-
+    use_case = SearchRecipe(repository)
     recipes = use_case.execute(title)
 
     return {"recipes": recipes}
@@ -92,13 +97,13 @@ async def search(
 async def create(
     title=Form(...),
     description=Form(...),
-    use_case: CreateRecipe = Depends(CreateRecipe),
-    current_user_token=Depends(oauth2_scheme),
+    repository: IRecipeRepository = Depends(RecipeRepository),
+    current_user: dict = Depends(oauth2_scheme),
 ) -> dict:
-
     recipe = RecipeCreateRequestDTO(title, description)
 
-    use_case.execute(recipe, current_user_token["id_user"])
+    use_case = CreateRecipe(repository),
+    use_case.execute(recipe, current_user["id_user"])
 
     return {"message": "Recipe created successfully"}
 
@@ -118,12 +123,14 @@ async def create(
 )
 async def delete(
     recipe_id: UUID,
-    use_case: DeleteRecipe = Depends(DeleteRecipe),
-    current_user_token=Depends(oauth2_scheme),
+    repository: IRecipeRepository = Depends(RecipeRepository),
+    current_user = Depends(oauth2_scheme),
 ) -> dict:
+    use_case = DeleteRecipe(repository)
+    
     try:
         use_case.execute(
-            current_user_token["role"], current_user_token["id"], recipe_id
+            current_user["role"], current_user["id"], recipe_id
         )
 
         return {"message": "Recipe deleted successfully."}
