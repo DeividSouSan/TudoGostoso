@@ -4,11 +4,13 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
+from ..contracts.user_repository import IUserRepository
+
 from ..models.users import User
 from ..utils.deps import get_db
 
 
-class UserRepository:
+class UserRepository(IUserRepository):
     def __init__(self, session: Annotated[Session, Depends(get_db)]) -> None:
         self.__session = session
 
@@ -47,5 +49,8 @@ class UserRepository:
     def get_by_activation_code(self, token: str) -> User | None:
         return self.__session.query(User).where(User.activation_code == token).first()
 
-    def commit(self):
+    def activate_account(self, user: User) -> None:
+        user.active = True
+        user.activation_code = None
+        
         self.__session.commit()

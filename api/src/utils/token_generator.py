@@ -3,8 +3,10 @@ from datetime import UTC, datetime, timedelta
 
 from jose import jwt
 
+from ..contracts.token_generator import ITokenGenerator
 
-class TokenGenerator:
+
+class TokenGenerator(ITokenGenerator):
     def __init__(self):
         from dotenv import load_dotenv
 

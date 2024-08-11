@@ -4,10 +4,12 @@ import smtplib
 
 from dotenv import load_dotenv
 
+from ..contracts.email_sender import IEmailSender
+
 load_dotenv()
 
 
-class ActivationCodeEmailSender:
+class EmailSender(IEmailSender):
     @staticmethod
     def send_activation_code(email_address: str, activation_code: int):
         body = f"Click the link to activate your account: http://localhost:8000/auth/register/{activation_code}"
