@@ -16,8 +16,7 @@ from ..utils.exceptions import *
 from ..utils.password_hasher import PasswordHasher
 from ..utils.token_generator import TokenGenerator
 
-token = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -97,7 +96,8 @@ async def login(
         user = UserLoginRequestDTO(email=user.username, password=user.password)
         token = use_case.execute(user)
 
-        return {"message": "User authorized.", "token": token}
+        return {"access_token": token, "token_type": "bearer"}
+    
     except UserNotFound:
         raise HTTPException(status_code=403, detail="Email not found.")
     except WrongPassword:
