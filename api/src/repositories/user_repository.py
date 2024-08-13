@@ -5,7 +5,6 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from ..contracts.user_repository import IUserRepository
-
 from ..models.users import User
 from ..utils.deps import get_db
 
@@ -20,7 +19,7 @@ class UserRepository(IUserRepository):
 
     def delete(self, user: User) -> None:
         self.__session.delete(user)
-        self.__session.commit
+        self.__session.commit()
 
     def all(self) -> list[User]:
         return self.__session.query(User).filter(User.active).all()
@@ -42,7 +41,8 @@ class UserRepository(IUserRepository):
     def search(self, username: str) -> list[User]:
         return (
             self.__session.query(User)
-            .filter(User.username.ilike(f"%{username}%") and User.active)
+            .filter(User.active)
+            .filter(User.username.ilike(f"%{username}%"))
             .all()
         )
 
@@ -52,5 +52,5 @@ class UserRepository(IUserRepository):
     def activate_account(self, user: User) -> None:
         user.active = True
         user.activation_code = None
-        
+
         self.__session.commit()

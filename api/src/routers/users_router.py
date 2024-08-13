@@ -2,7 +2,12 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from api.src.utils.exceptions import UnauthorizedAccountDelete
+from ..utils.token_generator import TokenGenerator
+
+from ..contracts.user_repository import IUserRepository
+from ..repositories.user_repository import UserRepository
+
+from ..utils.exceptions import UnauthorizedAccountDelete
 
 from ..dtos.user.user_response_dto import UserResponseDTO
 from ..routers.auth_router import oauth2_scheme
@@ -10,6 +15,7 @@ from ..use_cases.users.delete_user import DeleteUser
 from ..use_cases.users.get_all_users import GetAllUsers
 from ..use_cases.users.get_user import GetUser
 from ..use_cases.users.search_user import SearchUser
+from ..utils.deps import get_authorization_token
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -20,16 +26,20 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     description="Get all users that have an active account.",
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
-    response_model=list[UserResponseDTO],
     responses={
         status.HTTP_200_OK: {"description": "Return a list of all active users."},
     },
 )
 async def get_all(
-    use_case: GetAllUsers = Depends(GetAllUsers),
+    repository: IUserRepository = Depends(UserRepository),
 ) -> dict:
 
+    use_case = GetAllUsers(repository)
     users = use_case.execute()
+    
+    if users:
+        users = [UserResponseDTO(user) for user in users]
+
 
     return {"users": users}
 
@@ -40,16 +50,15 @@ async def get_all(
     description="Get a user by its unique UUID id.",
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
-    response_model=UserResponseDTO,
     responses={
         status.HTTP_200_OK: {"description": "Return the user that matches the id."},
     },
 )
 async def get(
     id_user: UUID,
-    use_case: GetUser = Depends(GetUser),
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-
+    use_case = GetUser(repository)
     user = use_case.execute(id_user)
 
     if not user:
@@ -57,7 +66,7 @@ async def get(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    return {"users": user}
+    return {"users": UserResponseDTO(user)}
 
 
 @users_router.get(
@@ -75,9 +84,9 @@ async def get(
 )
 async def search(
     username: str,
-    use_case: SearchUser = Depends(SearchUser),
+    repository: IUserRepository = Depends(UserRepository)
 ) -> dict:
-
+    use_case = SearchUser(repository)
     users = use_case.execute(username)
 
     if users:
@@ -90,6 +99,7 @@ async def search(
     "/{id_user:uuid}",
     summary="Delete a user from the database",
     description="Delete a user by it's id.",
+    dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {"description": "User account deleted."},
@@ -98,15 +108,19 @@ async def search(
 )
 async def delete(
     id_user: UUID,
-    current_user_token: dict[str, str] = Depends(oauth2_scheme),
-    use_case: DeleteUser = Depends(DeleteUser),
+    repository: IUserRepository = Depends(UserRepository),
+    token: str = Depends(oauth2_scheme),
+    token_generator = Depends(TokenGenerator)
 ) -> dict:
+    current_user = get_authorization_token(token, token_generator)
+    use_case = DeleteUser(repository)
+    
     try:
-        use_case.execute(id_user, current_user_token)
+        use_case.execute(id_user, current_user)
 
         return {"message": "User deleted"}
 
-    except UnauthorizedAccountDelete as e:
+    except UnauthorizedAccountDelete:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized to delete account",

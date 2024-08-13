@@ -2,11 +2,10 @@ import random
 
 from ...contracts.email_sender import IEmailSender
 from ...contracts.password_hasher import IPasswordHasher
+from ...contracts.user_repository import IUserRepository
 from ...dtos.user.user_register_request_dto import UserRegisterRequestDTO
 from ...models.users import User
 from ...utils.exceptions import UserAlreadyExists
-
-from ...contracts.user_repository import IUserRepository
 
 
 class RegisterUser:
@@ -16,7 +15,7 @@ class RegisterUser:
         password_hasher: IPasswordHasher = None,
         email_sender: IEmailSender = None,
     ) -> None:
-        
+
         self._repository = repository
         self._password_hasher = password_hasher
         self._email_sender = email_sender
@@ -33,7 +32,7 @@ class RegisterUser:
             fullname=user.fullname,
             password_hash=self._password_hasher.hash(user.password),
             email=user.email,
-            activation_code=random.randint(100000, 999999), # Poderia ser uma classe
+            activation_code=random.randint(100000, 999999),  # Poderia ser uma classe
         )
 
         self._repository.add(new_user)

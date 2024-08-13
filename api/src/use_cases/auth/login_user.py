@@ -10,7 +10,7 @@ class LoginUser:
         self,
         repository: IUserRepository,
         token_handler: ITokenGenerator,
-        password_hasher: IPasswordHasher
+        password_hasher: IPasswordHasher,
     ):
         self._repository = repository
         self._token_handler = token_handler
