@@ -2,6 +2,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from ..contracts.token_generator import ITokenGenerator
+
 from ..utils.token_generator import TokenGenerator
 
 from ..contracts.user_repository import IUserRepository
@@ -110,7 +112,7 @@ async def delete(
     id_user: UUID,
     repository: IUserRepository = Depends(UserRepository),
     token: str = Depends(oauth2_scheme),
-    token_generator = Depends(TokenGenerator)
+    token_generator: ITokenGenerator = Depends(TokenGenerator)
 ) -> dict:
     current_user = get_authorization_token(token, token_generator)
     use_case = DeleteUser(repository)
