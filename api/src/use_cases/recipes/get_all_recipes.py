@@ -7,4 +7,4 @@ class GetAllRecipes:
         self._repository = repository
 
     def execute(self) -> list[Recipe]:
-        return self._repository.get()
+        return self._repository.all()
