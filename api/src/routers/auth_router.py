@@ -50,7 +50,7 @@ async def register(
         raise HTTPException(status_code=400, detail="User account already exists.")
 
 
-@auth_router.post(
+@auth_router.get(
     "/register/{activation_code:str}",
     summary="Activates a new user account.",
     description="Activates a new user account by verifying the activation code sent to the user's email.",
