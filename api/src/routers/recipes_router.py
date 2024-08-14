@@ -2,6 +2,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 
+from ..contracts.token_generator import ITokenGenerator
+from ..utils.deps import get_authorization_token
+from ..utils.token_generator import TokenGenerator
+
 from ..contracts.recipe_repository import IRecipeRepository
 from ..dtos.recipe.recipe_create_request_dto import RecipeCreateRequestDTO
 from ..dtos.recipe.recipe_response_dto import RecipeResponseDTO
@@ -23,7 +27,6 @@ recipes_router = APIRouter(prefix="/recipes", tags=["Recipes"])
     description="List all recipes in the database.",
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
-    response_model=list[RecipeResponseDTO],
     responses={status.HTTP_200_OK: {"description": "All recipes listed successfully."}},
 )
 async def get_all(
@@ -31,6 +34,9 @@ async def get_all(
 ) -> dict:
     use_case = GetAllRecipes(repository)
     recipes = use_case.execute()
+    
+    if recipes:
+        recipes = [RecipeResponseDTO(recipe) for recipe in recipes]
 
     return {"recipes": recipes}
 
@@ -41,7 +47,6 @@ async def get_all(
     description="List a specific recipe in the database by ID.",
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
-    response_model=RecipeResponseDTO,
     responses={
         status.HTTP_200_OK: {"description": "Recipe found."},
         status.HTTP_404_NOT_FOUND: {"description": "Recipe not found."},
@@ -56,7 +61,7 @@ async def get(
     try:
         recipe = use_case.execute(recipe_id)
 
-        return {"recipe": recipe}
+        return {"recipe": RecipeResponseDTO(recipe)}
     except RecipeNotFound:
         raise HTTPException(status_code=404, detail="Recipe not found.")
 
@@ -67,14 +72,18 @@ async def get(
     description="Search for a recipe by it's title.",
     dependencies=[Depends(oauth2_scheme)],
     status_code=status.HTTP_200_OK,
-    response_model=list[RecipeResponseDTO],
     responses={status.HTTP_200_OK: {"description": "Search successful."}},
 )
 async def search(
-    title: str, repository: IRecipeRepository = Depends(RecipeRepository)
+    title: str, 
+    repository: IRecipeRepository = Depends(RecipeRepository)
 ) -> dict:
     use_case = SearchRecipe(repository)
+    
     recipes = use_case.execute(title)
+    
+    if recipes:
+        recipes = [RecipeResponseDTO(recipe) for recipe in recipes]
 
     return {"recipes": recipes}
 
@@ -95,12 +104,15 @@ async def create(
     title=Form(...),
     description=Form(...),
     repository: IRecipeRepository = Depends(RecipeRepository),
-    current_user: dict = Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme),
+    token_generator: ITokenGenerator = Depends(TokenGenerator)
 ) -> dict:
-    recipe = RecipeCreateRequestDTO(title, description)
+    current_user = get_authorization_token(token, token_generator)
+    
+    recipe = RecipeCreateRequestDTO(title=title, description=description)
 
-    use_case = (CreateRecipe(repository),)
-    use_case.execute(recipe, current_user["id_user"])
+    use_case = CreateRecipe(repository)
+    use_case.execute(recipe, UUID(current_user["id"]))
 
     return {"message": "Recipe created successfully"}
 
@@ -121,8 +133,11 @@ async def create(
 async def delete(
     recipe_id: UUID,
     repository: IRecipeRepository = Depends(RecipeRepository),
-    current_user=Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme),
+    token_generator: ITokenGenerator = Depends(TokenGenerator)
 ) -> dict:
+    current_user = get_authorization_token(token, token_generator)
+    
     use_case = DeleteRecipe(repository)
 
     try:
